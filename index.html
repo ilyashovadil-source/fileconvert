@@ -122,6 +122,60 @@ body[data-mode=merge] #mergeBig{display:inline-block}
 body[data-mode=merge] #all,body[data-mode=merge] #zip,body[data-mode=merge] [data-a=conv],body[data-mode=merge] #merge,body[data-mode=merge] #optsCard,
 body[data-mode=split] #all,body[data-mode=split] #zip,body[data-mode=split] [data-a=conv],body[data-mode=split] #merge,body[data-mode=split] #mergePdf,body[data-mode=split] #optsCard,body[data-mode=split] .ord{display:none}
 @media(max-width:700px){.dd{position:static}.menu{left:0;right:0;min-width:0;grid-template-columns:1fr}header nav{margin-left:0}.nb{padding:8px 9px;font-size:12px}}
+
+/* FileConvert Pro refresh */
+:root{--bg:#f5f7fb;--card:#fff;--menu:#fff;--tx:#172033;--mu:#65718a;--bd:#e3e8f1;--ac:#4f46e5;--ac2:#7c3aed;--ok:#168653;--er:#dc3545;--sh:0 12px 32px rgba(25,38,70,.07);--scene:none;--veil:0}
+:root[data-theme=dark]{--bg:#0c1220;--card:#141d2e;--menu:#182338;--tx:#edf2ff;--mu:#9eabc2;--bd:#29364d;--ac:#818cf8;--ac2:#a78bfa;--ok:#4ade80;--er:#fb7185;--sh:0 14px 36px rgba(0,0,0,.24)}
+body{background:var(--bg);background-image:none;line-height:1.6}
+.wrap{max-width:1160px;padding:0 24px}
+header{position:relative;gap:18px;padding:20px 0;border-bottom:1px solid var(--bd);margin-bottom:20px}
+.logo{font-size:21px;letter-spacing:-.04em}
+.logo i{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#8b5cf6)}
+header nav{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.nb{border:0;background:transparent;border-radius:10px;padding:9px 12px;color:var(--mu);font-weight:600;cursor:pointer}
+.nb:hover,.nb.on{background:rgba(99,102,241,.1);color:var(--ac)}
+.btn{border-radius:11px;box-shadow:none}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(45,55,90,.1)}
+.btn.pr{background:linear-gradient(135deg,#4f46e5,#7c3aed)}
+.hero{text-align:left;max-width:760px;margin:0 auto;padding:32px 0 28px}
+.hero h1{font-size:clamp(32px,5vw,50px);line-height:1.12;letter-spacing:-.045em;font-weight:700}
+.hero p{font-size:17px;max-width:650px}
+.priv{background:rgba(22,163,74,.09);font-size:13px;padding:6px 12px}
+.drop{max-width:860px;margin:0 auto;background:var(--card);border:1.5px dashed #b8c2d6;border-radius:20px;padding:46px 24px;box-shadow:0 12px 34px rgba(25,38,70,.055)}
+:root[data-theme=dark] .drop{border-color:#43516c}
+.drop:hover,.drop.over{border-color:var(--ac);background:rgba(99,102,241,.045);transform:none}
+.drop .or{color:var(--mu);margin:12px 0 4px}
+.fm{font-size:12px;color:var(--mu)}
+.card{border-radius:16px;box-shadow:0 8px 24px rgba(25,38,70,.045);padding:20px}
+details.card{max-width:860px;margin:18px auto 0}
+.card summary{font-weight:650;cursor:pointer}
+.opts{padding-top:16px}
+.opts input,.opts select,td select{border:1px solid var(--bd);border-radius:9px}
+#listCard{margin-top:24px}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td{padding:12px 8px}
+tr:hover td{background:rgba(99,102,241,.025)}
+.th{border:1px solid var(--bd)}
+.tag{background:rgba(99,102,241,.09);color:var(--ac)}
+.pb{height:7px}
+.priv2{max-width:860px;margin-left:auto;margin-right:auto}
+.fl{max-width:1000px;margin:30px auto 0;gap:16px}
+.fl div{border-radius:15px;box-shadow:0 6px 20px rgba(25,38,70,.035)}
+.fl h2{font-size:15px}
+footer{border-top:1px solid var(--bd);margin-top:26px}
+.dd .menu{border:1px solid var(--bd);border-radius:14px;box-shadow:var(--sh);padding:16px}
+.menu button{border-radius:8px}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid rgba(99,102,241,.35);outline-offset:2px}
+#inp{display:none}
+@media(max-width:700px){
+ .wrap{padding:0 14px}header{flex-wrap:wrap;padding:14px 0;margin-bottom:8px}
+ header nav{order:3;width:100%;overflow-x:auto;flex-wrap:nowrap}
+ .nb{white-space:nowrap}.hero{padding:24px 0 20px}.hero h1{font-size:34px}
+ .drop{padding:34px 16px}.btn.big{padding:13px 22px;font-size:16px}
+ .card{padding:14px}.bar{align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
 </style>
 </head>
 <body>
@@ -143,13 +197,13 @@ body[data-mode=split] #all,body[data-mode=split] #zip,body[data-mode=split] [dat
 <section class="hero">
 <h1 id="ht">Конвертер файлов онлайн</h1>
 <p id="hs">Изображения, PDF, документы и таблицы — прямо в браузере</p>
-<span class="priv">🔒 Ваши файлы не загружаются на сервер.</span>
+<span class="priv">🔒 Файлы остаются на вашем устройстве</span>
 </section>
 
 <div class="drop" id="drop">
 <button class="btn pr big" id="pick">Выбрать файл</button>
 <input type="file" id="inp" multiple hidden>
-<p class="or">или перетащите файлы сюда</p>
+<p class="or">или перетащите файлы сюда</p>\n <p class="fm">Поддерживается пакетная обработка · Без регистрации · Бесплатно</p>
 <p class="fm" id="fmts">JPG, PNG, WEBP, GIF, BMP, SVG, PDF, DOCX, TXT, HTML, CSV, XLSX, PPTX</p>
 </div>
 
@@ -197,7 +251,7 @@ body[data-mode=split] #all,body[data-mode=split] #zip,body[data-mode=split] [dat
 <div><h2>📄 PDF</h2><p>PDF → PNG/JPG, изображения и TXT → PDF, объединение и разделение PDF.</p></div>
 <div><h2>📊 Таблицы и документы</h2><p>CSV ⇄ XLSX, DOCX → TXT/HTML, HTML → TXT/PDF.</p></div>
 </div>
-<footer>FileConvert — работает офлайн после загрузки библиотек. Ограничения: GIF/SVG как результат и PPTX не поддерживаются.</footer>
+<footer>FileConvert · Бесплатный конвертер файлов. Обработка выполняется локально в браузере; для загрузки библиотек требуется интернет.</footer>
 </div>
 <dialog id="splitDlg">
 <h3>✂️ Разделить PDF</h3>
@@ -225,7 +279,7 @@ const TG={img:['png','jpg','webp','bmp','pdf'],pdf:['png','jpg'],txt:['pdf'],htm
 const MIME={png:'image/png',jpg:'image/jpeg',webp:'image/webp',bmp:'image/bmp'};
 const UNSUP='Этот формат пока не поддерживается для локальной конвертации.';
 const BAD='Не удалось обработать файл. Возможно, файл поврежден или данный формат не поддерживается браузером.';
-const MAXSZ=300*1024*1024;
+const MAXSZ=150*1024*1024;
 let files=[],uid=0,busy=false;
 
 /* ---------- utils ---------- */
@@ -257,7 +311,7 @@ async function toCanvas(file,o,t){
  else if(o.keep){const s=w&&h?Math.min(w/iw,h/ih):w?w/iw:h/ih;w=Math.round(iw*s);h=Math.round(ih*s)}
  else{w=w||iw;h=h||ih}
  w=Math.max(1,w);h=Math.max(1,h);
- if(w*h>268e6)throw new Error('big');
+ if(w*h>80e6)throw U('Слишком большое разрешение. Уменьшите ширину/высоту в настройках.');
  const sw=o.rot===90||o.rot===270,c=document.createElement('canvas');c.width=sw?h:w;c.height=sw?w:h;
  const x=c.getContext('2d');
  const bg=o.bg||(['jpg','bmp','pdf'].includes(t)?'#ffffff':null);
@@ -320,8 +374,8 @@ async function run(f){
   pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const pdf=await pdfjsLib.getDocument({data:await f.file.arrayBuffer()}).promise,items=[];
   for(let p=1;p<=pdf.numPages;p++){
-   const pg=await pdf.getPage(p),b=pg.getViewport({scale:1}),s=o.w?o.w/b.width:2,vp=pg.getViewport({scale:s});
-   if(vp.width*vp.height>268e6)throw new Error('big');
+   const pg=await pdf.getPage(p),b=pg.getViewport({scale:1});let scale=o.w&&o.h?(o.keep?Math.min(o.w/b.width,o.h/b.height):o.w/b.width):o.w?o.w/b.width:o.h?o.h/b.height:2;scale=Math.max(.1,Math.min(scale,8));const vp=pg.getViewport({scale});
+   if(vp.width*vp.height>80e6)throw U('Слишком большое разрешение. Уменьшите ширину/высоту в настройках.');
    const c=document.createElement('canvas');c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);
    const x=c.getContext('2d'),bg=o.bg||(t==='jpg'?'#fff':null);if(bg){x.fillStyle=bg;x.fillRect(0,0,c.width,c.height)}
    await pg.render({canvasContext:x,viewport:vp}).promise;
@@ -360,7 +414,7 @@ function addFiles(list){
   const m=file.name.match(/\.([^.]+)$/),ext=m?m[1].toLowerCase():'',kind=KIND[ext];
   if(!kind){toast(`«${file.name}»: формат не поддерживается`,'e');continue}
   if(md.ext&&!md.ext.includes(ext)){toast(`«${file.name}»: для «${md.t}» нужен формат ${md.ext.map(x=>x.toUpperCase()).join('/')}`,'e');continue}
-  if(file.size>MAXSZ){toast(`«${file.name}»: файл слишком большой (макс. 300 МБ)`,'e');continue}
+  if(file.size>MAXSZ){toast(`«${file.name}»: файл слишком большой (макс. 150 МБ)`,'e');continue}
   const e=ext==='jpeg'?'jpg':ext==='htm'?'html':ext,tg=TG[kind].filter(x=>x!==e);
   const f={id:++uid,file,name:file.name,ext:e,kind,size:file.size,mime:file.type||'—',targets:tg,target:tg[0]||'',status:'ready',pages:0,url:kind==='img'?URL.createObjectURL(file):null};
   if(kind==='pdf')countPages(f);
@@ -512,7 +566,7 @@ const MODES={
  merge:{t:'Объединить PDF',s:'Соедините несколько PDF в один файл. Порядок меняйте стрелками ▲ ▼.',ext:['pdf'],btn:'Выбрать PDF файлы'},
  split:{t:'Разделить PDF',s:'Разбейте PDF на отдельные страницы или извлеките нужные диапазоны.',ext:['pdf'],one:1,btn:'Выбрать PDF файл'},
  jpg2pdf:{t:'JPG в PDF',s:'Преобразуйте изображения в PDF-документ.',ext:IMG,target:'pdf',btn:'Выбрать изображения'},
- html2pdf:{t:'HTML в PDF',s:'Сохраните HTML-страницу как PDF.',ext:['html','htm'],target:'pdf',btn:'Выбрать HTML файл'},
+ html2pdf:{t:'HTML в PDF',s:'Преобразуйте текстовое содержимое HTML в PDF-документ.',ext:['html','htm'],target:'pdf',btn:'Выбрать HTML файл'},
  txt2pdf:{t:'TXT в PDF',s:'Превратите текстовый файл в PDF.',ext:['txt'],target:'pdf',btn:'Выбрать TXT файл'},
  pdf2jpg:{t:'PDF в JPG',s:'Каждая страница PDF станет изображением JPG.',ext:['pdf'],target:'jpg',btn:'Выбрать PDF файл'},
  pdf2png:{t:'PDF в PNG',s:'Каждая страница PDF станет изображением PNG.',ext:['pdf'],target:'png',btn:'Выбрать PDF файл'},
