@@ -257,6 +257,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 <select id="sort" class="btn sm"><option value="">Сортировка…</option><option value="name">По имени</option><option value="size">По размеру</option><option value="ext">По формату</option></select>
 <button class="btn sm" id="merge">📑 Изображения → один PDF</button>
 <button class="btn sm" id="mergePdf">🔗 Объединить PDF</button>
+<button class="btn sm" id="assemblePdf">📚 Собрать всё в один PDF</button>
 <button class="btn sm" id="clear">🗑 Очистить все</button>
 </div></div>
 <div class="tw"><table><thead><tr><th></th><th>Файл</th><th>Формат</th><th>Размер</th><th>Конвертировать в</th><th>Статус</th><th>Действие</th></tr></thead><tbody id="tb"></tbody></table></div>
@@ -288,6 +289,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
   <span class="convert-count" id="convertCount"></span>
   <div class="act">
    <button class="btn" id="convertAdd">Добавить файлы</button>
+   <button class="btn" id="convertAssemble">Собрать в один PDF</button>
    <button class="btn" id="convertDownload" disabled>Скачать готовые</button>
    <button class="btn pr" id="convertStart">Конвертировать все</button>
   </div>
@@ -502,6 +504,10 @@ function renderConvertDialog(){
  }).join('');
  const total=files.length,ready=files.filter(f=>f.targets.length&&f.status!=='done'&&f.status!=='work').length;
  const done=files.filter(f=>f.status==='done').length;
+ const mergeKinds=['pdf','img','txt','html','docx','csv','xlsx'];
+ const canAssemble=total>=2&&files.every(f=>mergeKinds.includes(f.kind));
+ $('#convertAssemble').disabled=!canAssemble||busy;
+ $('#convertAssemble').title=canAssemble?'Собрать файлы в один PDF':'Нужны минимум два файла поддерживаемых форматов: PDF, изображения, TXT, HTML, DOCX, CSV или XLSX';
  $('#convertCount').textContent=`Файлов: ${total} · Готово: ${done}`;
  $('#convertStart').disabled=!ready||busy;
  $('#convertStart').textContent=busy?'Обработка…':ready?'Конвертировать все':'Всё обработано';
@@ -544,6 +550,7 @@ $('#convertClose').onclick=()=>$('#convertDlg').close();
 $('#convertAdd').onclick=()=>{ $('#convertDlg').close();$('#inp').click() };
 $('#convertStart').onclick=()=>$('#all').click();
 $('#convertDownload').onclick=()=>$('#zip').click();
+$('#convertAssemble').onclick=()=>$('#assemblePdf').click();
 
 
 $('#all').onclick=async()=>{
@@ -558,6 +565,7 @@ $('#zip').onclick=async()=>{
   lib(window.JSZip,'JSZip');
   if(items.length===1)return save(items[0].blob,items[0].name);
   await dlItems(items,'converted.zip')}catch(e){toast(e.u?e.message:BAD,'e')}};
+$('#assemblePdf').onclick=assembleFilesToPdf;
 $('#merge').onclick=async()=>{
  const imgs=files.filter(f=>f.kind==='img');
  if(!imgs.length)return toast('Добавьте хотя бы одно изображение','e');
@@ -567,6 +575,46 @@ $('#clear').onclick=()=>{files.forEach(f=>{freeRes(f);f.url&&URL.revokeObjectURL
 $('#sort').onchange=e=>{const k=e.target.value;if(!k)return;
  files.sort((a,b)=>k==='size'?b.size-a.size:String(a[k]).localeCompare(String(b[k]),'ru'));e.target.value='';render()};
 $('#q').oninput=e=>$('#qv').textContent=e.target.value;
+
+/* ---------- Сборка разных типов файлов в один PDF ---------- */
+async function assembleFilesToPdf(){
+ const supported=new Set(['pdf','img','txt','html','docx','csv','xlsx']);
+ if(files.length<2)return toast('Добавьте минимум два файла для сборки','e');
+ const unsupported=files.filter(f=>!supported.has(f.kind));
+ if(unsupported.length)return toast('Пока нельзя добавить: '+unsupported.map(f=>f.name).join(', ')+'. Поддерживаются PDF, изображения, TXT, HTML, DOCX, CSV и XLSX.','e');
+ const btn=$('#assemblePdf'),modalBtn=$('#convertAssemble');
+ btn.disabled=true;if(modalBtn)modalBtn.disabled=true;
+ try{
+  const {PDFDocument}=PL(),out=await PDFDocument.create(),o=opts();
+  for(let i=0;i<files.length;i++){
+   const f=files[i];toast('Добавляю в PDF: '+(i+1)+' из '+files.length+' — '+f.name);
+   let blob;
+   if(f.kind==='pdf')blob=new Blob([await f.file.arrayBuffer()],{type:'application/pdf'});
+   else if(f.kind==='img')blob=await imgsPdf([f],o);
+   else{
+    let txt='';
+    if(f.kind==='txt')txt=await f.file.text();
+    else if(f.kind==='html')txt=htmlText(await f.file.text());
+    else if(f.kind==='docx'){
+     lib(window.mammoth,'mammoth');
+     txt=(await mammoth.extractRawText({arrayBuffer:await f.file.arrayBuffer()})).value;
+    }else if(f.kind==='csv'||f.kind==='xlsx'){
+     lib(window.XLSX,'SheetJS');
+     const wb=f.kind==='csv'?XLSX.read(await f.file.text(),{type:'string'}):XLSX.read(await f.file.arrayBuffer());
+     txt=wb.SheetNames.map(name=>'Лист: '+name+'\n'+XLSX.utils.sheet_to_csv(wb.Sheets[name])).join('\n\n');
+    }
+    blob=await textPdf(txt,o);
+   }
+   const src=await PDFDocument.load(await blob.arrayBuffer(),{ignoreEncryption:true,updateMetadata:false});
+   const pages=await out.copyPages(src,src.getPageIndices());pages.forEach(p=>out.addPage(p));
+   $('#pg').style.width=Math.round((i+1)/files.length*100)+'%';await tick();
+  }
+  save(pdfBlob(await out.save()),'combined-document.pdf');
+  toast('Готово! Все файлы собраны в один PDF ('+out.getPageCount()+' стр.)','o');
+ }catch(e){
+  console.error(e);toast(e.u?e.message:'Не удалось собрать PDF. Проверьте, не повреждены ли исходные файлы.','e');
+ }finally{btn.disabled=false;if(modalBtn)modalBtn.disabled=false;render();renderConvertDialog()}
+}
 
 /* ---------- PDF: объединение и разделение (pdf-lib) ---------- */
 const PL=()=>{lib(window.PDFLib,'pdf-lib');return window.PDFLib};
