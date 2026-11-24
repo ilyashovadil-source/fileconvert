@@ -16,6 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--menu:#fff;--tx:#172033;--mu:#65718a;--bd:#e3e8f1;--ac:#4f46e5;--ac2:#7c3aed;--ok:#168653;--er:#dc3545;--sh:0 12px 32px rgba(25,38,70,.07);--scene:none;--veil:0}
 :root[data-theme=dark]{--bg:#0c1220;--card:#141d2e;--menu:#182338;--tx:#edf2ff;--mu:#9eabc2;--bd:#29364d;--ac:#818cf8;--ac2:#a78bfa;--ok:#4ade80;--er:#fb7185;--sh:0 14px 36px rgba(0,0,0,.24)}
@@ -112,7 +113,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 #mergeBig{display:none}
 body[data-mode=merge] #mergeBig{display:inline-block}
 body[data-mode=merge] #all,body[data-mode=merge] #dlAll,body[data-mode=merge] [data-a=conv],body[data-mode=merge] #merge,body[data-mode=merge] #optsCard,body[data-mode=merge] .mchk,
-body[data-mode=split] #all,body[data-mode=split] #dlAll,body[data-mode=split] [data-a=conv],body[data-mode=split] #merge,body[data-mode=split] #mergePdf,body[data-mode=split] #optsCard,body[data-mode=split] .ord,body[data-mode=split] .mchk{display:none}
+body:is([data-mode=split],[data-mode=delpages]) :is(#all,#dlAll,[data-a=conv],#merge,#mergePdf,#optsCard,.ord,.mchk){display:none}
 /* окно конвертации */
 #convertDlg{width:min(760px,94vw);max-width:760px;max-height:88vh;overflow:auto;padding:0;border-radius:22px}
 #convertDlg::backdrop{background:rgba(8,14,28,.64);backdrop-filter:blur(4px)}
@@ -154,6 +155,19 @@ body[data-mode=split] #all,body[data-mode=split] #dlAll,body[data-mode=split] [d
 .tools a{color:var(--mu);text-decoration:none;margin:0 8px;white-space:nowrap;display:inline-block;padding:3px 0}
 .tools a:hover{color:var(--ac);text-decoration:underline}
 .tools b{display:block;margin-bottom:6px;color:var(--tx)}
+
+.note{max-width:860px;margin:14px auto 0;padding:14px 18px;border:1px solid var(--bd);border-left:4px solid var(--ac);border-radius:12px;background:var(--card);font-size:14px;color:var(--mu)}
+.note b{color:var(--tx)}.note ul{margin:6px 0 0;padding-left:20px}.note li{margin:3px 0}
+.convert-note{margin:10px 24px 0;font-size:13px}
+#pagesDlg{width:min(900px,95vw);max-width:900px;max-height:90vh;overflow:auto;padding:0;border-radius:22px}
+#pagesDlg::backdrop{background:rgba(8,14,28,.64);backdrop-filter:blur(4px)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;max-height:52vh;overflow:auto;padding:4px}
+.pc{position:relative;aspect-ratio:1/1.35;border:2px solid var(--bd);border-radius:8px;cursor:pointer;background:#fff;display:grid;place-items:center;overflow:hidden;user-select:none}
+.pc canvas{width:100%;height:100%;object-fit:contain;display:block}
+.pc .n{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:99px;font-size:11px;font-weight:700;padding:0 8px;line-height:18px;z-index:1}
+.pc.del{border-color:var(--er);box-shadow:0 0 0 2px var(--er)}
+.pc.del::after{content:"✓";position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:99px;background:var(--er);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700}
+@media(max-width:600px){#pagesDlg{width:100vw;max-width:none;height:100dvh;max-height:100dvh;border-radius:0;border:0}.convert-note{margin:10px 16px 0}}
 </style>
 </head>
 <body>
@@ -163,6 +177,8 @@ body[data-mode=split] #all,body[data-mode=split] #dlAll,body[data-mode=split] [d
 <nav>
 <button class="nb" data-mode="merge">Объединить PDF</button>
 <button class="nb" data-mode="split">Разделить PDF</button>
+<button class="nb" data-mode="delpages">Удалить страницы</button>
+<button class="nb" data-mode="video2audio">Видео в аудио</button>
 <div class="dd"><button class="nb ddb">Конвертировать<s></s></button>
 <div class="menu">
 <div><h4>В PDF</h4><button data-mode="jpg2pdf">JPG в PDF</button><button data-mode="html2pdf">HTML в PDF</button><button data-mode="txt2pdf">TXT в PDF</button></div>
@@ -183,8 +199,10 @@ body[data-mode=split] #all,body[data-mode=split] #dlAll,body[data-mode=split] [d
 <input type="file" id="inp" multiple hidden>
 <p class="or">или перетащите файлы сюда</p>
 <p class="fm">Поддерживается пакетная обработка · Без регистрации · Бесплатно</p>
-<p class="fm" id="fmts">JPG, PNG, WEBP, GIF, BMP, SVG, PDF, DOCX, TXT, HTML, CSV, XLSX, PPTX</p>
+<p class="fm" id="fmts">JPG, PNG, WEBP, GIF, BMP, SVG, PDF, DOCX, TXT, HTML, CSV, XLSX, PPTX, MP4, MOV, WEBM</p>
 </div>
+
+<div class="note hide" id="modeNote"></div>
 
 <details class="card" id="optsCard">
 <summary>⚙️ Настройки</summary>
@@ -229,10 +247,10 @@ body[data-mode=split] #all,body[data-mode=split] #dlAll,body[data-mode=split] [d
 
 <div class="fl">
 <div><h2>🖼 Изображения</h2><p>JPG, PNG, WEBP, BMP, PDF. Размер, качество, поворот, фон.</p></div>
-<div><h2>📄 PDF</h2><p>PDF → PNG/JPG, изображения и TXT → PDF, объединение и разделение PDF.</p></div>
+<div><h2>📄 PDF</h2><p>PDF → PNG/JPG, изображения и TXT → PDF, объединение, разделение и удаление страниц PDF, звук из видео.</p></div>
 <div><h2>📊 Таблицы и документы</h2><p>CSV ⇄ XLSX, DOCX → TXT/HTML, HTML → TXT/PDF.</p></div>
 </div>
-<nav class="tools" aria-label="Инструменты"><b>Инструменты</b><a href="jpg-v-pdf.html">JPG в PDF</a><a href="pdf-v-jpg.html">PDF в JPG</a><a href="pdf-v-png.html">PDF в PNG</a><a href="html-v-pdf.html">HTML в PDF</a><a href="txt-v-pdf.html">TXT в PDF</a><a href="word-v-txt.html">Word в TXT</a><a href="word-v-html.html">Word в HTML</a><a href="excel-v-csv.html">Excel в CSV</a><a href="csv-v-excel.html">CSV в Excel</a><a href="obedinit-pdf.html">Объединить PDF</a><a href="razdelit-pdf.html">Разделить PDF</a><br><a href="privacy.html">Политика конфиденциальности</a></nav>
+<nav class="tools" aria-label="Инструменты"><b>Инструменты</b><a href="jpg-v-pdf.html">JPG в PDF</a><a href="pdf-v-jpg.html">PDF в JPG</a><a href="pdf-v-png.html">PDF в PNG</a><a href="html-v-pdf.html">HTML в PDF</a><a href="txt-v-pdf.html">TXT в PDF</a><a href="word-v-txt.html">Word в TXT</a><a href="word-v-html.html">Word в HTML</a><a href="excel-v-csv.html">Excel в CSV</a><a href="csv-v-excel.html">CSV в Excel</a><a href="obedinit-pdf.html">Объединить PDF</a><a href="razdelit-pdf.html">Разделить PDF</a><a href="video-v-audio.html">Видео в аудио</a><a href="udalit-stranicy-pdf.html">Удалить страницы PDF</a><br><a href="privacy.html">Политика конфиденциальности</a></nav>
 <footer>FileConvert · Бесплатный конвертер файлов. Обработка выполняется локально в браузере; для загрузки библиотек требуется интернет.</footer>
 </div>
 
@@ -245,6 +263,7 @@ body[data-mode=split] #all,body[data-mode=split] #dlAll,body[data-mode=split] [d
   <span id="bulkWrap"></span>
   <label class="chk mchk" title="Файлы одного формата (PDF, TXT, HTML, Excel) будут собраны в один общий файл"><input type="checkbox" id="mergeChk2" checked> Объединить в один файл</label>
  </div>
+ <p class="note convert-note hide" id="convertNote"></p>
  <div class="convert-files"><div class="gal" id="convertFiles"></div></div>
  <div class="convert-foot">
   <span class="convert-count" id="convertCount"></span>
@@ -254,6 +273,22 @@ body[data-mode=split] #all,body[data-mode=split] #dlAll,body[data-mode=split] [d
    <button class="btn" id="convertDownload" disabled>Скачать готовые</button>
    <button class="btn pr" id="convertStart">Конвертировать все</button>
   </div>
+ </div>
+</dialog>
+
+<dialog id="pagesDlg" aria-labelledby="pgTitle">
+ <div class="convert-head">
+  <div><h3 id="pgTitle">🗑 Страницы PDF</h3><p id="pgName"></p></div>
+  <button class="btn sm" id="pgClose" aria-label="Закрыть">✕</button>
+ </div>
+ <div class="convert-opts">
+  <label style="margin:0;flex:1;min-width:200px">Номера страниц<input id="pgRanges" placeholder="например: 2, 5-7" autocomplete="off"></label>
+  <span class="convert-count" id="pgInfo"></span>
+ </div>
+ <div class="convert-files"><div class="pgrid" id="pgGrid"></div><div class="err" id="pgErr"></div></div>
+ <div class="convert-foot">
+  <span class="convert-count">Нажимайте на страницы, чтобы отметить их</span>
+  <div class="act"><button class="btn" id="pgKeep">Оставить только отмеченные</button><button class="btn pr" id="pgDelete">Удалить отмеченные</button></div>
  </div>
 </dialog>
 
@@ -278,13 +313,13 @@ body[data-mode=split] #all,body[data-mode=split] #dlAll,body[data-mode=split] [d
 <script>
 'use strict';
 const $=s=>document.querySelector(s), esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const KIND={jpg:'img',jpeg:'img',png:'img',webp:'img',gif:'img',bmp:'img',svg:'img',pdf:'pdf',txt:'txt',html:'html',htm:'html',csv:'csv',xlsx:'xlsx',docx:'docx',pptx:'pptx'};
-const TG={img:['png','jpg','webp','bmp','pdf'],pdf:['png','jpg'],txt:['pdf'],html:['txt','pdf'],csv:['xlsx','pdf'],xlsx:['csv','pdf'],docx:['txt','html','pdf'],pptx:[]};
+const KIND={jpg:'img',jpeg:'img',png:'img',webp:'img',gif:'img',bmp:'img',svg:'img',pdf:'pdf',txt:'txt',html:'html',htm:'html',csv:'csv',xlsx:'xlsx',docx:'docx',pptx:'pptx',mp4:'video',m4v:'video',mov:'video',webm:'video',ogv:'video',mkv:'video',avi:'video'};
+const TG={img:['png','jpg','webp','bmp','pdf'],pdf:['png','jpg'],txt:['pdf'],html:['txt','pdf'],csv:['xlsx','pdf'],xlsx:['csv','pdf'],docx:['txt','html','pdf'],pptx:[],video:['mp3','wav']};
 const MIME={png:'image/png',jpg:'image/jpeg',webp:'image/webp',bmp:'image/bmp'};
 const MERGE_T=new Set(['pdf','txt','html','xlsx']); /* форматы, которые можно собрать в один файл */
 const UNSUP='Этот формат пока не поддерживается для локальной конвертации.';
 const BAD='Не удалось обработать файл. Возможно, файл поврежден или данный формат не поддерживается браузером.';
-const MAXSZ=150*1024*1024;
+const MAXSZ=150*1024*1024,MAXVID=300*1024*1024;
 let files=[],uid=0,busy=false,combined=[],mergeOn=true;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -381,10 +416,39 @@ async function extractText(f){
   return wb.SheetNames.map(n=>'Лист: '+n+'\n'+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n\n')}
  throw U(UNSUP)}
 
+/* ---------- видео -> аудио (MP3 / WAV) ---------- */
+function i16(a,s,e){const n=Math.max(0,Math.min(e,a.length)-s),r=new Int16Array(n);for(let i=0;i<n;i++){const v=Math.max(-1,Math.min(1,a[s+i]));r[i]=v<0?v*32768:v*32767}return r}
+async function videoAudio(f,t,o){
+ const AC=window.AudioContext||window.webkitAudioContext;
+ if(!AC)throw U('Ваш браузер не поддерживает обработку звука. Попробуйте Chrome, Edge, Firefox или Safari последних версий.');
+ if(t==='mp3')lib(window.lamejs,'lamejs');
+ const ctx=new AC();let buf;
+ try{buf=await ctx.decodeAudioData(await f.file.arrayBuffer())}
+ catch(e){console.error(e);throw U('Не удалось достать звук: формат или кодек не поддерживается браузером, в видео нет звука, либо файл слишком большой для памяти устройства.')}
+ finally{ctx.close&&ctx.close()}
+ const nCh=Math.min(2,buf.numberOfChannels),sr=buf.sampleRate,L=buf.getChannelData(0),R=nCh>1?buf.getChannelData(1):L,len=buf.length;
+ if(t==='wav'){
+  const data=nCh*len*2,ab=new ArrayBuffer(44+data),v=new DataView(ab),w=(p,s)=>{for(let i=0;i<s.length;i++)v.setUint8(p+i,s.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+data,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,data,true);
+  let p=44;
+  for(let i=0;i<len;i++){
+   for(let c=0;c<nCh;c++){const x=Math.max(-1,Math.min(1,(c?R:L)[i]));v.setInt16(p,x<0?x*32768:x*32767,true);p+=2}
+   if(i%2000000===0&&i){f.p=Math.round(i/len*100);render();await tick()}}
+  return new Blob([ab],{type:'audio/wav'})}
+ const kbps=o.q>=.8?192:o.q>=.5?128:96,enc=new lamejs.Mp3Encoder(nCh,sr,kbps),parts=[],BL=1152;
+ for(let i=0,n=0;i<len;i+=BL,n++){
+  const d=nCh>1?enc.encodeBuffer(i16(L,i,i+BL),i16(R,i,i+BL)):enc.encodeBuffer(i16(L,i,i+BL));
+  if(d.length)parts.push(new Uint8Array(d));
+  if(n%400===0&&n){f.p=Math.round(i/len*100);render();await tick()}}
+ const end=enc.flush();if(end.length)parts.push(new Uint8Array(end));
+ return new Blob(parts,{type:'audio/mpeg'})}
+
 /* ---------- conversion core ---------- */
+
 async function run(f){
  const o=opts(),base=f.name.replace(/\.[^.]+$/,''),t=f.target,out=(b,e)=>[{blob:b,name:base+'.'+(e||t)}];
  if(f.kind==='pptx')throw U(UNSUP);
+ if(f.kind==='video')return out(await videoAudio(f,t,o),t);
  if(t==='pdf'&&['docx','csv','xlsx'].includes(f.kind))return out(await textPdf(await extractText(f),o));
  if(f.kind==='img'){
   if(t==='pdf')return out(await imgsPdf([f],o));
@@ -482,7 +546,8 @@ function addFiles(list){
   const m=file.name.match(/\.([^.]+)$/),ext=m?m[1].toLowerCase():'',kind=KIND[ext];
   if(!kind){toast(`«${file.name}»: формат не поддерживается`,'e');continue}
   if(md.ext&&!md.ext.includes(ext)){toast(`«${file.name}»: для «${md.t}» нужен формат ${md.ext.map(x=>x.toUpperCase()).join('/')}`,'e');continue}
-  if(file.size>MAXSZ){toast(`«${file.name}»: файл слишком большой (макс. 150 МБ)`,'e');continue}
+  const lim=kind==='video'?MAXVID:MAXSZ;
+  if(file.size>lim){toast(`«${file.name}»: файл слишком большой (макс. ${Math.round(lim/1048576)} МБ)`,'e');continue}
   const e=ext==='jpeg'?'jpg':ext==='htm'?'html':ext,tg=TG[kind].filter(x=>x!==e);
   const f={id:++uid,file,name:file.name,ext:e,kind,size:file.size,mime:file.type||'—',targets:tg,target:tg[0]||'',status:'ready',pages:0,url:kind==='img'?URL.createObjectURL(file):null};
   if(kind==='pdf'){countPages(f);pdfThumb(f)}
@@ -491,9 +556,10 @@ function addFiles(list){
   files.push(f);added.push(f)}
  render();
  if(cur==='split'&&added[0]&&added[0].kind==='pdf')openSplit(added[0]);
+ else if(cur==='delpages'&&added[0]&&added[0].kind==='pdf')openPages(added[0]);
  else if(added.length&&cur!=='merge')openConvertDialog()}
 function removeF(id){const f=files.find(x=>x.id===id);if(!f)return;resetCombined();freeRes(f);f.url&&URL.revokeObjectURL(f.url);files=files.filter(x=>x!==f);render()}
-const ICON={pdf:'📕',docx:'📘',xlsx:'📗',csv:'📗',txt:'📝',html:'🌐',pptx:'📙'};
+const ICON={pdf:'📕',docx:'📘',xlsx:'📗',csv:'📗',txt:'📝',html:'🌐',pptx:'📙',video:'🎬'};
 function cardHTML(f,i,inDlg){
  const thumb=`<div class="gt">${f.url?`<img src="${f.url}" alt="">`:(ICON[f.kind]||'📄')}<span class="gtag">${f.ext}</span><span class="gi">${i+1}</span></div>`;
  let st='Готов к конвертации',cl='';
@@ -504,9 +570,9 @@ function cardHTML(f,i,inDlg){
   if(f.inCombined)st=`✓ В общем файле ${f.target.toUpperCase()}`;
   else{const sz=f.items.reduce((a,x)=>a+x.blob.size,0);st=`✓ ${f.target.toUpperCase()} · ${fmt(sz)}${f.items.length>1?` · ${f.items.length} файлов`:''}`}}
  const sel=f.targets.length?`<select class="tsel" data-id="${f.id}" aria-label="Формат для ${esc(f.name)}" ${f.status==='work'?'disabled':''}>${f.targets.map(t=>`<option value="${t}" ${t===f.target?'selected':''}>${t.toUpperCase()}</option>`).join('')}</select>`:'';
- const b=(a,txt,extra='')=>`<button class="btn sm ${extra}" data-a="${a}" data-id="${f.id}" ${f.status==='work'&&a!=='rm'?'disabled':''}>${txt}</button>`;
+ const b=(a,txt,extra='',ti='')=>`<button class="btn sm ${extra}" data-a="${a}" data-id="${f.id}" ${ti?`title="${ti}"`:''} ${f.status==='work'&&a!=='rm'?'disabled':''}>${txt}</button>`;
  const acts=`<span class="ord">${b('up','◀')}${b('down','▶')}</span>`+(inDlg?b('rm','✕'):
-  (f.kind==='pdf'?b('split','✂'):'')+(f.targets.length?b('conv',f.status==='done'||f.status==='error'?'↻':'Конвертировать','pr'):'')+(f.status==='done'?b('dl','⬇'):'')+b('rm','✕'));
+  (f.kind==='pdf'?b('split','✂','','Разделить PDF')+b('pages','🗑','','Удалить страницы'):'')+(f.targets.length?b('conv',f.status==='done'||f.status==='error'?'↻':'Конвертировать','pr'):'')+(f.status==='done'?b('dl','⬇'):'')+b('rm','✕'));
  return `<div class="gc">${thumb}<div class="gn" title="${esc(f.name)}">${esc(f.name)}</div>
   <div class="gm">${fmt(f.size)}${f.pages?` · ${f.pages} стр.`:''}</div>${sel}<div class="gs ${cl}">${esc(st)}</div><div class="ga">${acts}</div></div>`}
 function render(){
@@ -529,6 +595,7 @@ function renderConvertDialog(){
  const canAssemble=total>=2&&files.every(f=>mergeKinds.includes(f.kind));
  $('#convertAssemble').disabled=!canAssemble||busy;
  $('#convertAssemble').title=canAssemble?'Собрать файлы в один PDF':'Нужны минимум два файла поддерживаемых форматов: PDF, изображения, TXT, HTML, DOCX, CSV или XLSX';
+ const cn=$('#convertNote');if(cn){const hv=files.some(f=>f.kind==='video');cn.classList.toggle('hide',!hv);cn.textContent=hv?'Видео в аудио: размер файла до 300 МБ, очень длинные записи (1–2 часа и больше) могут не обработаться. MKV и AVI поддерживаются не всеми браузерами. Скорость MP3 зависит от ползунка «Качество» в настройках.':''}
  $('#convertCount').textContent=`Файлов: ${total} · Готово: ${done}`;
  $('#convertStart').disabled=!ready||busy;
  $('#convertStart').textContent=busy?'Обработка…':ready?'Конвертировать все':'Всё обработано';
@@ -551,6 +618,7 @@ async function onAct(e){
   else if(a==='rm')removeF(f.id);
   else if(a==='up'||a==='down'){const i=files.indexOf(f),j=a==='up'?i-1:i+1;if(j>=0&&j<files.length){resetCombined();[files[i],files[j]]=[files[j],files[i]];render()}}
   else if(a==='split')openSplit(f);
+  else if(a==='pages')openPages(f);
   else if(a==='dl')await saveMany(f.inCombined?combined:f.items)
  }catch(err){toast(err.u?err.message:BAD,'e')}}
 $('#gal').addEventListener('click',onAct);
@@ -689,8 +757,62 @@ $('#spGo').onclick=async()=>{
  }catch(e){console.error(e);$('#spErr').textContent=e.u?e.message:'Не удалось разделить PDF. Файл повреждён или защищён паролем.'}
  finally{go.disabled=false;go.textContent='Разделить'}};
 
+/* Удаление страниц PDF */
+let pgF=null,pgTok=0,pgDel=new Set(),pgN=0;
+const pdlg=$('#pagesDlg');
+function fmtRanges(set){const a=[...set].sort((x,y)=>x-y),o=[];for(let i=0;i<a.length;){let j=i;while(j+1<a.length&&a[j+1]===a[j]+1)j++;o.push(j>i?`${a[i]}-${a[j]}`:`${a[i]}`);i=j+1}return o.join(', ')}
+function syncPg(){
+ const cells=$('#pgGrid').children;
+ for(let i=0;i<cells.length;i++)cells[i].classList.toggle('del',pgDel.has(i+1));
+ $('#pgRanges').value=fmtRanges(pgDel);
+ $('#pgInfo').textContent=`Отмечено: ${pgDel.size} из ${pgN}`}
+async function openPages(f){
+ pgF=f;pgDel=new Set();pgN=0;const tok=++pgTok;
+ $('#pgName').textContent=f.name;$('#pgErr').textContent='';$('#pgGrid').innerHTML='';$('#pgRanges').value='';$('#pgInfo').textContent='Загрузка страниц…';
+ if(pdlg.showModal)pdlg.showModal();else pdlg.setAttribute('open','');
+ try{
+  lib(window.pdfjsLib,'pdf.js');
+  const pdf=await pdfjsLib.getDocument({data:await f.file.arrayBuffer()}).promise;
+  pgN=pdf.numPages;
+  $('#pgGrid').innerHTML=Array.from({length:pgN},(_,i)=>`<div class="pc" data-p="${i+1}"><span class="n">${i+1}</span></div>`).join('');
+  syncPg();
+  for(let p=1;p<=pgN&&tok===pgTok;p++){
+   const pg=await pdf.getPage(p),b=pg.getViewport({scale:1}),vp=pg.getViewport({scale:150/b.width});
+   const c=document.createElement('canvas');c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);
+   const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
+   await pg.render({canvasContext:x,viewport:vp}).promise;
+   const cell=$('#pgGrid').children[p-1];if(cell&&tok===pgTok)cell.prepend(c);
+   if(p%4===0)await tick()}
+ }catch(e){console.error(e);$('#pgErr').textContent=e.u?e.message:'Не удалось открыть PDF. Файл повреждён или защищён паролем.'}}
+$('#pgGrid').addEventListener('click',e=>{
+ const c=e.target.closest('.pc');if(!c)return;const p=+c.dataset.p;
+ pgDel.has(p)?pgDel.delete(p):pgDel.add(p);$('#pgErr').textContent='';syncPg()});
+$('#pgRanges').addEventListener('change',()=>{
+ const v=$('#pgRanges').value.trim();$('#pgErr').textContent='';
+ try{pgDel=v?new Set(parseRanges(v,pgN).flatMap(r=>r.idx.map(i=>i+1))):new Set();syncPg()}
+ catch(e){$('#pgErr').textContent=e.u?e.message:'Ошибка в номерах страниц'}});
+$('#pgClose').onclick=()=>pdlg.close();
+pdlg.addEventListener('close',()=>{pgTok++});
+async function savePages(keepMarked){
+ if(!pgF||!pgN)return;
+ if(!pgDel.size)return $('#pgErr').textContent='Отметьте страницы: нажмите на них или впишите номера.';
+ const all=Array.from({length:pgN},(_,i)=>i+1),keep=keepMarked?all.filter(p=>pgDel.has(p)):all.filter(p=>!pgDel.has(p));
+ if(!keep.length)return $('#pgErr').textContent='Нельзя удалить все страницы.';
+ const bt=[$('#pgKeep'),$('#pgDelete')];bt.forEach(x=>x.disabled=true);
+ try{
+  const {PDFDocument}=PL(),src=await loadPdfLib(pgF.file),d=await PDFDocument.create();
+  (await d.copyPages(src,keep.map(p=>p-1))).forEach(p=>d.addPage(p));
+  save(pdfBlob(await d.save()),pgF.name.replace(/\.[^.]+$/,'')+(keepMarked?'-selected':'-edited')+'.pdf');
+  pdlg.close();toast(`Готово: в файле ${keep.length} стр.`,'o')
+ }catch(e){console.error(e);$('#pgErr').textContent=e.u?e.message:'Не удалось сохранить PDF. Файл повреждён или защищён паролем.'}
+ finally{bt.forEach(x=>x.disabled=false)}}
+$('#pgDelete').onclick=()=>savePages(false);
+$('#pgKeep').onclick=()=>savePages(true);
+
 /* ---------- режимы / навигация ---------- */
-const IMG=['jpg','jpeg','png','webp','bmp','gif','svg'],FM0='JPG, PNG, WEBP, GIF, BMP, SVG, PDF, DOCX, TXT, HTML, CSV, XLSX, PPTX';
+
+const IMG=['jpg','jpeg','png','webp','bmp','gif','svg'],FM0='JPG, PNG, WEBP, GIF, BMP, SVG, PDF, DOCX, TXT, HTML, CSV, XLSX, PPTX, MP4, MOV, WEBM';
+const VNOTE=`<b>Ограничения:</b><ul><li>Звук достаётся прямо в браузере, видео никуда не отправляется.</li><li>Размер видео — до 300 МБ. Очень длинные записи (больше 1–2 часов) могут не поместиться в память устройства, тогда разделите их на части.</li><li>Форматы: MP4, M4V, MOV, WEBM, OGV. MKV и AVI открываются не во всех браузерах, это зависит от кодека.</li><li>Если в видео нет звуковой дорожки или оно защищено от копирования, получить аудио не выйдет.</li><li>MP3 кодируется со скоростью 96, 128 или 192 кбит/с в зависимости от ползунка «Качество» в настройках. WAV получается без сжатия и заметно больше по размеру.</li><li>Пока идёт обработка, не закрывайте вкладку. На слабых устройствах это может занять время.</li></ul>`;
 const MODES={
  convert:{t:'Конвертер файлов онлайн',s:'Изображения, PDF, документы и таблицы — прямо в браузере',btn:'Выбрать файл'},
  merge:{t:'Объединить PDF',s:'Соедините несколько PDF в один файл. Порядок меняйте стрелками ◀ ▶.',ext:['pdf'],btn:'Выбрать PDF файлы'},
@@ -703,7 +825,9 @@ const MODES={
  docx2txt:{t:'Word в TXT',s:'Извлеките текст из документа Word.',ext:['docx'],target:'txt',btn:'Выбрать Word файл'},
  docx2html:{t:'Word в HTML',s:'Преобразуйте документ Word в веб-страницу.',ext:['docx'],target:'html',btn:'Выбрать Word файл'},
  xlsx2csv:{t:'Excel в CSV',s:'Каждый лист таблицы станет отдельным CSV.',ext:['xlsx'],target:'csv',btn:'Выбрать Excel файл'},
- csv2xlsx:{t:'CSV в Excel',s:'Преобразуйте CSV в таблицу XLSX.',ext:['csv'],target:'xlsx',btn:'Выбрать CSV файл'}};
+ csv2xlsx:{t:'CSV в Excel',s:'Преобразуйте CSV в таблицу XLSX.',ext:['csv'],target:'xlsx',btn:'Выбрать CSV файл'},
+ video2audio:{t:'Видео в аудио',s:'Достаньте звук из видео и сохраните его в MP3 или WAV.',ext:['mp4','m4v','mov','webm','ogv','mkv','avi'],target:'mp3',btn:'Выбрать видео',note:VNOTE},
+ delpages:{t:'Удалить страницы PDF',s:'Отметьте ненужные страницы и сохраните PDF без них.',ext:['pdf'],one:1,btn:'Выбрать PDF файл'}};
 let cur='convert';
 const closeDD=()=>document.querySelectorAll('.dd').forEach(x=>x.classList.remove('open'));
 function setMode(m){
@@ -711,9 +835,10 @@ function setMode(m){
  $('#ht').textContent=d.t;$('#hs').textContent=d.s;$('#pick').textContent=d.btn;
  $('#inp').accept=d.ext?d.ext.map(e=>'.'+e).join(','):'';$('#inp').multiple=!d.one;
  $('#fmts').textContent=d.ext?d.ext.map(e=>e.toUpperCase()).join(', '):FM0;
+ const mn=$('#modeNote');mn.innerHTML=d.note||'';mn.classList.toggle('hide',!d.note);
  document.body.dataset.mode=m;if(!window.FC_MODE)document.title=(m==='convert'?'FileConvert — Конвертер файлов онлайн':d.t+' — FileConvert');
  document.querySelectorAll('header [data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
- $('.dd').classList.toggle('on',!['convert','merge','split'].includes(m));
+ $('.dd').classList.toggle('on',!['convert','merge','split','video2audio','delpages'].includes(m));
  $('#mergePdf').classList.toggle('pr',m==='merge');
  closeDD();
  if(!window.FC_MODE){try{history.replaceState(null,'','#'+(m==='convert'?'':m))}catch(e){}}
