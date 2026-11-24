@@ -176,6 +176,30 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
+
+/* Центрированное окно выбора формата и запуска конвертации */
+#convertDlg{width:min(760px,94vw);max-width:760px;max-height:88vh;overflow:auto;padding:0;border-radius:22px}
+#convertDlg::backdrop{background:rgba(8,14,28,.64);backdrop-filter:blur(4px)}
+.convert-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 24px 14px;border-bottom:1px solid var(--bd)}
+.convert-head h3{font-size:21px;margin:0 0 4px}
+.convert-head p{font-size:13px;color:var(--mu);margin:0}
+.convert-files{padding:8px 24px;max-height:48vh;overflow:auto}
+.convert-file{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,180px);gap:16px;align-items:center;padding:13px 0;border-bottom:1px solid var(--bd)}
+.convert-file:last-child{border-bottom:0}
+.convert-file-name{font-weight:600;overflow-wrap:anywhere;font-size:14px}
+.convert-file-meta{font-size:12px;color:var(--mu);margin-top:3px}
+.convert-file select{width:100%;min-width:0;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:9px;color:var(--tx)}
+.convert-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 24px 22px;border-top:1px solid var(--bd);background:var(--card)}
+.convert-foot .act{justify-content:flex-end}
+.convert-count{font-size:13px;color:var(--mu)}
+@media(max-width:600px){
+ #convertDlg{width:100vw;max-width:none;height:100dvh;max-height:100dvh;border-radius:0;border:0}
+ .convert-head{padding:18px 16px 12px}
+ .convert-files{padding:6px 16px;max-height:none}
+ .convert-file{grid-template-columns:minmax(0,1fr) 120px;gap:10px}
+ .convert-foot{padding:14px 16px calc(16px + env(safe-area-inset-bottom));position:sticky;bottom:0}
+ .convert-foot .act{width:100%}.convert-foot .act button{flex:1}
+}
 </style>
 </head>
 <body>
@@ -253,6 +277,23 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 </div>
 <footer>FileConvert · Бесплатный конвертер файлов. Обработка выполняется локально в браузере; для загрузки библиотек требуется интернет.</footer>
 </div>
+
+<dialog id="convertDlg" aria-labelledby="convertTitle">
+ <div class="convert-head">
+  <div><h3 id="convertTitle">Готово к конвертации</h3><p>Проверьте файлы и выберите нужный формат</p></div>
+  <button class="btn sm" id="convertClose" aria-label="Закрыть">✕</button>
+ </div>
+ <div class="convert-files" id="convertFiles"></div>
+ <div class="convert-foot">
+  <span class="convert-count" id="convertCount"></span>
+  <div class="act">
+   <button class="btn" id="convertAdd">Добавить файлы</button>
+   <button class="btn" id="convertDownload" disabled>Скачать готовые</button>
+   <button class="btn pr" id="convertStart">Конвертировать все</button>
+  </div>
+ </div>
+</dialog>
+
 <dialog id="splitDlg">
 <h3>✂️ Разделить PDF</h3>
 <p class="sub" id="spName"></p>
@@ -422,7 +463,8 @@ function addFiles(list){
   if(!tg.length){f.status='error';f.msg=UNSUP}
   files.push(f);added.push(f)}
  render();
- if(cur==='split'&&added[0]&&added[0].kind==='pdf')openSplit(added[0])}
+ if(cur==='split'&&added[0]&&added[0].kind==='pdf')openSplit(added[0]);
+ else if(added.length)openConvertDialog()}
 function removeF(id){const f=files.find(x=>x.id===id);if(!f)return;freeRes(f);f.url&&URL.revokeObjectURL(f.url);files=files.filter(x=>x!==f);render()}
 function render(){
  $('#listCard').classList.toggle('hide',!files.length);
@@ -446,7 +488,31 @@ function render(){
   <td><span class="tag">${f.ext}</span></td><td>${fmt(f.size)}</td><td>${sel}</td><td class="${cl}">${f.status==='error'?esc(st):st}</td>
   <td><div class="act"><span class="ord"><button class="btn sm" data-a="up" data-id="${f.id}" title="Выше" style="padding:1px 8px">▲</button><button class="btn sm" data-a="down" data-id="${f.id}" title="Ниже" style="padding:1px 8px">▼</button></span>${f.kind==='pdf'?`<button class="btn sm" data-a="split" data-id="${f.id}" ${busyRow?'disabled':''}>✂ Разделить</button>`:''}${f.targets.length?`<button class="btn sm pr" data-a="conv" data-id="${f.id}" ${busyRow?'disabled':''}>${f.status==='done'||f.status==='error'?'↻ Повторить':'Конвертировать'}</button>`:''}
   ${f.status==='done'?`<button class="btn sm" data-a="dl" data-id="${f.id}">⬇ Скачать</button>`:''}
-  <button class="btn sm" data-a="rm" data-id="${f.id}">✕</button></div></td></tr>`}).join('')}
+  <button class="btn sm" data-a="rm" data-id="${f.id}">✕</button></div></td></tr>`}).join('');
+ renderConvertDialog()}
+function renderConvertDialog(){
+ const host=$('#convertFiles');if(!host)return;
+ host.innerHTML=files.map(f=>{
+  const options=f.targets.length?f.targets.map(t=>`<option value="${t}" ${t===f.target?'selected':''}>${t.toUpperCase()}</option>`).join(''):'<option>Недоступно</option>';
+  const status=f.status==='done'?'✓ Готово':f.status==='work'?'Обработка…':f.status==='error'?f.msg||'Ошибка':'Ожидает конвертации';
+  return `<div class="convert-file">
+   <div><div class="convert-file-name">${esc(f.name)}</div><div class="convert-file-meta">${fmt(f.size)} · ${f.ext.toUpperCase()} · ${esc(status)}</div></div>
+   <select data-modal-id="${f.id}" aria-label="Формат для ${esc(f.name)}" ${!f.targets.length||f.status==='work'?'disabled':''}>${options}</select>
+  </div>`;
+ }).join('');
+ const total=files.length,ready=files.filter(f=>f.targets.length&&f.status!=='done'&&f.status!=='work').length;
+ const done=files.filter(f=>f.status==='done').length;
+ $('#convertCount').textContent=`Файлов: ${total} · Готово: ${done}`;
+ $('#convertStart').disabled=!ready||busy;
+ $('#convertStart').textContent=busy?'Обработка…':ready?'Конвертировать все':'Всё обработано';
+ $('#convertDownload').disabled=!done;
+}
+function openConvertDialog(){
+ const d=$('#convertDlg');if(!d)return;
+ renderConvertDialog();
+ if(!d.open&&d.showModal)d.showModal();
+}
+
 
 async function dlItems(items,zipName){
  if(items.length===1)return save(items[0].blob,items[0].name);
@@ -467,13 +533,25 @@ $('#tb').addEventListener('click',async e=>{
 $('#tb').addEventListener('change',e=>{
  if(!e.target.classList.contains('tsel'))return;
  const f=files.find(x=>x.id==e.target.dataset.id);f.target=e.target.value;if(f.status!=='work'){freeRes(f);f.status='ready'}render()});
+$('#convertFiles').addEventListener('change',e=>{
+ if(!e.target.matches('select[data-modal-id]'))return;
+ const f=files.find(x=>x.id===Number(e.target.dataset.modalId));if(!f)return;
+ f.target=e.target.value;if(f.status!=='work'){freeRes(f);f.status='ready'}render()});
+$('#convertFiles').addEventListener('click',e=>{
+ const f=files.find(x=>x.id===Number(e.target.dataset.modalId));if(f&&e.target.matches('select'))return;
+});
+$('#convertClose').onclick=()=>$('#convertDlg').close();
+$('#convertAdd').onclick=()=>{ $('#convertDlg').close();$('#inp').click() };
+$('#convertStart').onclick=()=>$('#all').click();
+$('#convertDownload').onclick=()=>$('#zip').click();
+
 
 $('#all').onclick=async()=>{
  const todo=files.filter(f=>f.targets.length&&f.status!=='done');
  if(!todo.length)return toast('Нет файлов для конвертации');
  busy=true;render();
  for(const f of todo)await convert(f);
- busy=false;render();
+ busy=false;render();renderConvertDialog();
  const ok=files.filter(f=>f.status==='done').length;toast(`Готово: ${ok} из ${files.length}`,'o')};
 $('#zip').onclick=async()=>{
  try{const items=[];files.filter(f=>f.status==='done').forEach(f=>f.items.forEach(i=>items.push(i)));
@@ -587,7 +665,7 @@ function setMode(m){
  $('#mergePdf').classList.toggle('pr',m==='merge');
  closeDD();
  try{history.replaceState(null,'','#'+(m==='convert'?'':m))}catch(e){}
- render()}
+ render();renderConvertDialog()}
 $('header').addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.dataset.mode)return setMode(b.dataset.mode);
