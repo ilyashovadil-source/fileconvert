@@ -601,7 +601,7 @@ async function assembleFilesToPdf(){
     }else if(f.kind==='csv'||f.kind==='xlsx'){
      lib(window.XLSX,'SheetJS');
      const wb=f.kind==='csv'?XLSX.read(await f.file.text(),{type:'string'}):XLSX.read(await f.file.arrayBuffer());
-     txt=wb.SheetNames.map(name=>'Лист: '+name+'\\n'+XLSX.utils.sheet_to_csv(wb.Sheets[name])).join('\\n\\n');
+     txt=wb.SheetNames.map(name=>'Лист: '+name+'\n'+XLSX.utils.sheet_to_csv(wb.Sheets[name])).join('\n\n');
     }
     blob=await textPdf(txt,o);
    }
