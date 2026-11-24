@@ -488,7 +488,8 @@ function render(){
   <td><span class="tag">${f.ext}</span></td><td>${fmt(f.size)}</td><td>${sel}</td><td class="${cl}">${f.status==='error'?esc(st):st}</td>
   <td><div class="act"><span class="ord"><button class="btn sm" data-a="up" data-id="${f.id}" title="Выше" style="padding:1px 8px">▲</button><button class="btn sm" data-a="down" data-id="${f.id}" title="Ниже" style="padding:1px 8px">▼</button></span>${f.kind==='pdf'?`<button class="btn sm" data-a="split" data-id="${f.id}" ${busyRow?'disabled':''}>✂ Разделить</button>`:''}${f.targets.length?`<button class="btn sm pr" data-a="conv" data-id="${f.id}" ${busyRow?'disabled':''}>${f.status==='done'||f.status==='error'?'↻ Повторить':'Конвертировать'}</button>`:''}
   ${f.status==='done'?`<button class="btn sm" data-a="dl" data-id="${f.id}">⬇ Скачать</button>`:''}
-  <button class="btn sm" data-a="rm" data-id="${f.id}">✕</button></div></td></tr>`}).join('')}
+  <button class="btn sm" data-a="rm" data-id="${f.id}">✕</button></div></td></tr>`}).join('');
+ renderConvertDialog()}
 function renderConvertDialog(){
  const host=$('#convertFiles');if(!host)return;
  host.innerHTML=files.map(f=>{
