@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ilyashovadil-source.github.io/fileconvert/sitemap.xml

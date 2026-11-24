@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<link rel="canonical" href="https://ilyashovadil-source.github.io/fileconvert/excel-v-csv.html">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Excel в CSV онлайн — XLSX в CSV бесплатно</title>
+<meta name="description" content="Конвертируйте таблицы Excel (XLSX) в CSV. Каждый лист сохраняется отдельным файлом, кодировка UTF-8.">
+<meta property="og:title" content="Excel в CSV онлайн — XLSX в CSV бесплатно">
+<meta property="og:description" content="Конвертируйте таблицы Excel (XLSX) в CSV. Каждый лист сохраняется отдельным файлом, кодировка UTF-8.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236366f1'/%3E%3Cpath d='M9 16h14m-5-5 5 5-5 5' stroke='%23fff' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--menu:#fff;--tx:#172033;--mu:#65718a;--bd:#e3e8f1;--ac:#4f46e5;--ac2:#7c3aed;--ok:#168653;--er:#dc3545;--sh:0 12px 32px rgba(25,38,70,.07);--scene:none;--veil:0}
+:root[data-theme=dark]{--bg:#0c1220;--card:#141d2e;--menu:#182338;--tx:#edf2ff;--mu:#9eabc2;--bd:#29364d;--ac:#818cf8;--ac2:#a78bfa;--ok:#4ade80;--er:#fb7185;--sh:0 14px 36px rgba(0,0,0,.24)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.6;transition:background .3s,color .3s}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+header{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:20;margin-top:14px;margin-bottom:20px;padding:20px 0;gap:18px;flex-wrap:wrap;background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh)}
+.logo{font-weight:700;font-size:21px;letter-spacing:-.04em;display:flex;gap:10px;align-items:center;background:none;border:0;padding:0;cursor:pointer}
+.logo i{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#8b5cf6);display:grid;place-items:center;color:#fff;font-style:normal}
+button,select,input{font:inherit;color:inherit}
+.btn{border-radius:11px;padding:10px 16px;cursor:pointer;font-weight:600;background:var(--card);border:1px solid var(--bd);transition:.2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(45,55,90,.1)}
+.btn.pr{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:0}
+.btn.big{padding:15px 36px;font-size:18px;border-radius:14px}
+.btn:disabled{opacity:.5;pointer-events:none}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:9px}
+header nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 auto 0 18px}
+.nb{background:transparent;border:0;padding:9px 12px;border-radius:10px;font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;display:flex;gap:7px;align-items:center;color:var(--mu);transition:.15s}
+.nb:hover,.nb.on,.dd.on>.nb{background:rgba(99,102,241,.1);color:var(--ac)}
+.nb s{width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:.2s}
+.dd.open>.nb s{transform:rotate(-135deg)}
+.dd{position:relative}
+.menu{display:none;position:absolute;top:calc(100% + 12px);left:0;min-width:600px;background:var(--menu);border:1px solid var(--bd);border-radius:14px;box-shadow:var(--sh);padding:16px;grid-template-columns:repeat(3,1fr);gap:8px 18px}
+.dd.open .menu{display:grid}
+.menu h4{margin:0 0 6px;font-size:12px;color:var(--mu);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.menu button{display:block;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:14px;font-weight:500}
+.menu button:hover{background:rgba(99,102,241,.1)}.menu button.on{color:var(--ac)}
+.hero{text-align:left;max-width:760px;margin:0 auto;padding:32px 0 28px}
+.hero h1{font-size:clamp(32px,5vw,50px);line-height:1.12;letter-spacing:-.045em;font-weight:700;margin:0 0 8px}
+.hero p{font-size:17px;max-width:650px;color:var(--mu);margin:0}
+.priv{display:inline-block;margin-top:14px;background:rgba(22,163,74,.09);color:var(--ok);padding:6px 12px;border-radius:99px;font-weight:600;font-size:13px}
+.drop{max-width:860px;margin:0 auto;background:var(--card);border:1.5px dashed #b8c2d6;border-radius:20px;padding:46px 24px;text-align:center;cursor:pointer;transition:.25s;box-shadow:0 12px 34px rgba(25,38,70,.055)}
+:root[data-theme=dark] .drop{border-color:#43516c}
+.drop:hover,.drop.over{border-color:var(--ac);background:rgba(99,102,241,.045)}
+.drop .or{color:var(--mu);margin:12px 0 4px}
+.fm{font-size:12px;color:var(--mu);margin:6px 0 0}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:20px;margin-top:20px;box-shadow:0 8px 24px rgba(25,38,70,.045)}
+.card h3{margin:0 0 12px;font-size:17px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding-top:16px}
+.opts label{font-size:13px;color:var(--mu);display:flex;flex-direction:column;gap:4px}
+.opts input,.opts select{background:var(--bg);border:1px solid var(--bd);border-radius:9px;padding:8px;width:100%}
+.opts input[type=color]{padding:2px;height:38px}
+details.card{padding:0;max-width:860px;margin:18px auto 0}
+details.card>summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:650;font-size:17px;display:flex;align-items:center;gap:10px;border-radius:16px;user-select:none}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2px solid var(--mu);border-bottom:2px solid var(--mu);transform:rotate(45deg);transition:transform .2s}
+details.card[open]>summary::after{transform:rotate(-135deg)}
+details.card>.body{padding:0 18px 18px}
+#listCard{margin-top:24px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.bar .st{color:var(--mu);font-size:14px}
+.act{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pb{height:7px;background:var(--bd);border-radius:9px;overflow:hidden;margin-top:14px}
+.pb i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .3s}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.s-done{color:var(--ok)}.s-error{color:var(--er)}.s-work{color:#2563eb}
+.pgs{font-size:11px;color:var(--ac);font-weight:600}
+.ord{display:inline-flex;gap:4px}
+/* галерея */
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.gc{background:var(--bg);border:1px solid var(--bd);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:7px;min-width:0;animation:in .3s}
+.gt{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--card);border:1px solid var(--bd);display:grid;place-items:center;font-size:46px}
+.gt img{width:100%;height:100%;object-fit:cover;display:block}
+.gtag{position:absolute;left:6px;top:6px;font-size:11px;font-weight:700;line-height:1.4;text-transform:uppercase;padding:2px 7px;border-radius:6px;background:var(--card);color:var(--ac);border:1px solid var(--bd)}
+.gi{position:absolute;right:6px;top:6px;min-width:22px;height:22px;border-radius:99px;background:var(--ac);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center;padding:0 6px;line-height:1}
+.gn{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gm{font-size:12px;color:var(--mu)}
+.gs{font-size:12px;font-weight:600;min-height:18px;overflow-wrap:anywhere}
+.gc select{width:100%;background:var(--card);border:1px solid var(--bd);border-radius:9px;padding:7px;color:var(--tx)}
+.ga{display:flex;gap:5px;flex-wrap:wrap}
+.chk{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;cursor:pointer;user-select:none}
+.chk input{width:auto;accent-color:var(--ac)}
+.priv2{display:flex;gap:14px;align-items:center;max-width:860px;margin-left:auto;margin-right:auto}
+.priv2 b{font-size:28px}
+.fl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:30px auto 0;max-width:1000px}
+.fl div{background:var(--card);border:1px solid var(--bd);border-radius:15px;padding:16px;box-shadow:0 6px 20px rgba(25,38,70,.035)}
+.fl h2{font-size:15px;margin:0 0 4px}.fl p{margin:0;color:var(--mu);font-size:14px}
+footer{text-align:center;color:var(--mu);font-size:13px;padding:30px 0;border-top:1px solid var(--bd);margin-top:26px}
+#toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:99}
+.toast{background:var(--tx);color:var(--bg);padding:12px 16px;border-radius:12px;max-width:340px;box-shadow:var(--sh);animation:in .3s;font-size:14px}
+.toast.e{background:var(--er);color:#fff}.toast.o{background:var(--ok);color:#fff}
+.hide{display:none!important}
+dialog{border:1px solid var(--bd);border-radius:18px;background:var(--menu);color:var(--tx);padding:22px;width:min(480px,92vw);box-shadow:var(--sh)}
+dialog::backdrop{background:rgba(10,12,30,.55)}
+dialog h3{margin:0 0 4px;font-size:18px}
+dialog .sub{color:var(--mu);font-size:13px;margin:0 0 14px;word-break:break-all}
+dialog label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mu);margin-bottom:12px}
+dialog select,dialog input{background:var(--bg);border:1px solid var(--bd);border-radius:9px;padding:9px;width:100%;color:var(--tx)}
+dialog .hint{font-size:12px;color:var(--mu);margin:-6px 0 12px}
+dialog .err{color:var(--er);font-size:13px;margin:-4px 0 10px}
+dialog .row{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+#inp{display:none}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid rgba(99,102,241,.35);outline-offset:2px}
+#mergeBig{display:none}
+body[data-mode=merge] #mergeBig{display:inline-block}
+body[data-mode=merge] #all,body[data-mode=merge] #dlAll,body[data-mode=merge] [data-a=conv],body[data-mode=merge] #merge,body[data-mode=merge] #optsCard,body[data-mode=merge] .mchk,
+body[data-mode=split] #all,body[data-mode=split] #dlAll,body[data-mode=split] [data-a=conv],body[data-mode=split] #merge,body[data-mode=split] #mergePdf,body[data-mode=split] #optsCard,body[data-mode=split] .ord,body[data-mode=split] .mchk{display:none}
+/* окно конвертации */
+#convertDlg{width:min(760px,94vw);max-width:760px;max-height:88vh;overflow:auto;padding:0;border-radius:22px}
+#convertDlg::backdrop{background:rgba(8,14,28,.64);backdrop-filter:blur(4px)}
+.convert-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 24px 14px;border-bottom:1px solid var(--bd)}
+.convert-head h3{font-size:21px;margin:0 0 4px}
+.convert-head p{font-size:13px;color:var(--mu);margin:0}
+.convert-opts{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 24px 0}
+.convert-files{padding:12px 24px;max-height:52vh;overflow:auto}
+.convert-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 24px 22px;border-top:1px solid var(--bd);background:var(--menu)}
+.convert-foot .act{justify-content:flex-end}
+.convert-count{font-size:13px;color:var(--mu)}
+@media(max-width:700px){
+ .dd{position:static}.menu{left:0;right:0;min-width:0;grid-template-columns:1fr}
+ .wrap{padding:0 14px}header{padding:14px;margin-bottom:8px}
+ header nav{order:3;width:100%;overflow-x:auto;flex-wrap:nowrap;margin-left:0}
+ .nb{white-space:nowrap;padding:8px 9px;font-size:12px}.hero{padding:24px 0 20px}.hero h1{font-size:34px}
+ .drop{padding:34px 16px}.btn.big{padding:13px 22px;font-size:16px}
+ .card{padding:14px}.bar{align-items:flex-start}
+ .gal{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+}
+@media(max-width:600px){
+ #convertDlg{width:100vw;max-width:none;height:100dvh;max-height:100dvh;border-radius:0;border:0}
+ .convert-head{padding:18px 16px 12px}.convert-opts{padding:12px 16px 0}
+ .convert-files{padding:12px 16px;max-height:none}
+ .convert-foot{padding:14px 16px calc(16px + env(safe-area-inset-bottom));position:sticky;bottom:0}
+ .convert-foot .act{width:100%}.convert-foot .act button{flex:1}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+.seo{max-width:860px;margin:30px auto 0}
+.seo h2{font-size:20px;margin:0 0 8px;letter-spacing:-.02em}
+.seo h3{font-size:16px;margin:18px 0 6px}
+.seo p,.seo li{color:var(--mu);font-size:15px}
+.seo ol{padding-left:20px;margin:8px 0}
+.seo details{border:1px solid var(--bd);border-radius:12px;padding:12px 16px;margin-top:8px;background:var(--card)}
+.seo summary{cursor:pointer;font-weight:600}
+.seo details p{margin:8px 0 0}
+.tools{max-width:1000px;margin:26px auto 0;text-align:center;font-size:14px}
+.tools a{color:var(--mu);text-decoration:none;margin:0 8px;white-space:nowrap;display:inline-block;padding:3px 0}
+.tools a:hover{color:var(--ac);text-decoration:underline}
+.tools b{display:block;margin-bottom:6px;color:var(--tx)}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Не испортятся ли русские буквы?", "acceptedAnswer": {"@type": "Answer", "text": "Нет, файл сохраняется в UTF-8 с меткой BOM, и Excel открывает его корректно."}}, {"@type": "Question", "name": "Что будет с формулами?", "acceptedAnswer": {"@type": "Answer", "text": "В CSV сохраняются вычисленные значения, формулы не переносятся."}}]}</script>
+<script>window.FC_MODE="xlsx2csv";</script>
+</head>
+<body>
+<div class="wrap">
+<header>
+<button class="logo" data-mode="convert"><i>⇄</i>FileConvert</button>
+<nav>
+<button class="nb" data-mode="merge">Объединить PDF</button>
+<button class="nb" data-mode="split">Разделить PDF</button>
+<div class="dd"><button class="nb ddb">Конвертировать<s></s></button>
+<div class="menu">
+<div><h4>В PDF</h4><button data-mode="jpg2pdf">JPG в PDF</button><button data-mode="html2pdf">HTML в PDF</button><button data-mode="txt2pdf">TXT в PDF</button></div>
+<div><h4>Из PDF</h4><button data-mode="pdf2jpg">PDF в JPG</button><button data-mode="pdf2png">PDF в PNG</button></div>
+<div><h4>Документы</h4><button data-mode="docx2txt">Word в TXT</button><button data-mode="docx2html">Word в HTML</button><button data-mode="xlsx2csv">Excel в CSV</button><button data-mode="csv2xlsx">CSV в Excel</button></div>
+</div></div>
+</nav>
+<button class="btn" id="theme" title="Тема">🌓</button>
+</header>
+<section class="hero">
+<h1 id="ht">Excel в CSV</h1>
+<p id="hs">Каждый лист таблицы станет отдельным CSV.</p>
+<span class="priv">🔒 Файлы остаются на вашем устройстве</span>
+</section>
+
+<div class="drop" id="drop">
+<button class="btn pr big" id="pick">Выбрать файл</button>
+<input type="file" id="inp" multiple hidden>
+<p class="or">или перетащите файлы сюда</p>
+<p class="fm">Поддерживается пакетная обработка · Без регистрации · Бесплатно</p>
+<p class="fm" id="fmts">JPG, PNG, WEBP, GIF, BMP, SVG, PDF, DOCX, TXT, HTML, CSV, XLSX, PPTX</p>
+</div>
+
+<details class="card" id="optsCard">
+<summary>⚙️ Настройки</summary>
+<div class="body">
+<div class="opts">
+<label>Качество: <b id="qv">90</b>%<input type="range" id="q" min="10" max="100" value="90"></label>
+<label>Ширина (px)<input type="number" id="w" min="1" placeholder="авто"></label>
+<label>Высота (px)<input type="number" id="h" min="1" placeholder="авто"></label>
+<label>Пропорции<select id="keep"><option value="1">Сохранять</option><option value="0">Не сохранять</option></select></label>
+<label>Поворот<select id="rot"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label>
+<label>Фон<select id="bgm"><option value="t">Прозрачный</option><option value="c">Цвет</option></select></label>
+<label>Цвет фона<input type="color" id="bgc" value="#ffffff"></label>
+<label>Страница PDF<select id="ps"><option value="a4">A4</option><option value="letter">Letter</option></select></label>
+<label>Ориентация<select id="or"><option value="p">Книжная</option><option value="l">Альбомная</option></select></label>
+<label>Поля (мм)<input type="number" id="mg" value="10" min="0" max="50"></label>
+</div>
+<p style="font-size:12px;color:var(--mu);margin:10px 0 0">Прозрачность сохраняется только в PNG/WEBP; для JPG, BMP и PDF используется цвет фона (по умолчанию белый).</p>
+</div>
+</details>
+
+<div class="card hide" id="listCard">
+<div class="bar">
+<div class="st" id="stats"></div>
+<div class="act">
+<label class="chk mchk" title="Файлы одного формата (PDF, TXT, HTML, Excel) будут собраны в один общий файл"><input type="checkbox" id="mergeChk" checked> Объединить в один файл</label>
+<select id="sort" class="btn sm"><option value="">Сортировка…</option><option value="name">По имени</option><option value="size">По размеру</option><option value="ext">По формату</option></select>
+<button class="btn sm" id="merge">📑 Изображения → один PDF</button>
+<button class="btn sm" id="mergePdf">🔗 Объединить PDF</button>
+<button class="btn sm" id="assemblePdf">📚 Собрать всё в один PDF</button>
+<button class="btn sm" id="clear">🗑 Очистить все</button>
+</div></div>
+<div class="gal" id="gal"></div>
+<div class="pb"><i id="pg"></i></div>
+<div class="act" style="margin-top:16px;justify-content:center">
+<button class="btn pr big" id="mergeBig">Объединить PDF</button>
+<button class="btn pr big" id="all">Конвертировать все</button>
+<button class="btn big" id="dlAll" disabled>Скачать все</button>
+</div>
+</div>
+
+<div class="card priv2"><b>🔒</b><div><h3 style="margin:0">Конфиденциальность</h3><span style="color:var(--mu)">Файлы обрабатываются непосредственно на вашем устройстве и не отправляются на сервер.</span></div></div>
+
+<section class="seo">
+<h2>Excel в CSV — быстро и бесплатно</h2>
+<p>CSV удобен для импорта в базы данных и другие программы. Если в книге несколько листов, для каждого создаётся отдельный CSV.</p>
+<h3>Как это работает</h3>
+<ol><li>Нажмите «Выбрать файл» или перетащите файлы на страницу.</li><li>Проверьте файлы в галерее и выберите формат.</li><li>Нажмите «Конвертировать все» и скачайте результат.</li></ol>
+<p>Файлы обрабатываются прямо на вашем устройстве и не отправляются на сервер.</p>
+<h3>Частые вопросы</h3>
+<details><summary>Не испортятся ли русские буквы?</summary><p>Нет, файл сохраняется в UTF-8 с меткой BOM, и Excel открывает его корректно.</p></details><details><summary>Что будет с формулами?</summary><p>В CSV сохраняются вычисленные значения, формулы не переносятся.</p></details>
+</section>
+<nav class="tools" aria-label="Инструменты"><b>Инструменты</b><a href="jpg-v-pdf.html">JPG в PDF</a><a href="pdf-v-jpg.html">PDF в JPG</a><a href="pdf-v-png.html">PDF в PNG</a><a href="html-v-pdf.html">HTML в PDF</a><a href="txt-v-pdf.html">TXT в PDF</a><a href="word-v-txt.html">Word в TXT</a><a href="word-v-html.html">Word в HTML</a><a href="excel-v-csv.html">Excel в CSV</a><a href="csv-v-excel.html">CSV в Excel</a><a href="obedinit-pdf.html">Объединить PDF</a><a href="razdelit-pdf.html">Разделить PDF</a><br><a href="privacy.html">Политика конфиденциальности</a></nav>
+<footer>FileConvert · Бесплатный конвертер файлов. Обработка выполняется локально в браузере; для загрузки библиотек требуется интернет.</footer>
+</div>
+
+<dialog id="convertDlg" aria-labelledby="convertTitle">
+ <div class="convert-head">
+  <div><h3 id="convertTitle">Готово к конвертации</h3><p>Проверьте файлы и выберите нужный формат</p></div>
+  <button class="btn sm" id="convertClose" aria-label="Закрыть">✕</button>
+ </div>
+ <div class="convert-opts">
+  <span id="bulkWrap"></span>
+  <label class="chk mchk" title="Файлы одного формата (PDF, TXT, HTML, Excel) будут собраны в один общий файл"><input type="checkbox" id="mergeChk2" checked> Объединить в один файл</label>
+ </div>
+ <div class="convert-files"><div class="gal" id="convertFiles"></div></div>
+ <div class="convert-foot">
+  <span class="convert-count" id="convertCount"></span>
+  <div class="act">
+   <button class="btn" id="convertAdd">Добавить файлы</button>
+   <button class="btn" id="convertAssemble">Собрать в один PDF</button>
+   <button class="btn" id="convertDownload" disabled>Скачать готовые</button>
+   <button class="btn pr" id="convertStart">Конвертировать все</button>
+  </div>
+ </div>
+</dialog>
+
+<dialog id="splitDlg">
+<h3>✂️ Разделить PDF</h3>
+<p class="sub" id="spName"></p>
+<label>Режим
+<select id="spMode">
+<option value="each">Каждая страница — отдельный файл</option>
+<option value="ranges">По диапазонам — отдельный файл на каждый</option>
+<option value="extract">Извлечь страницы — в один файл</option>
+</select></label>
+<div id="spRangeBox" class="hide">
+<label>Страницы<input id="spRanges" placeholder="например: 1-3, 5, 7-9" autocomplete="off"></label>
+<p class="hint" id="spHint"></p>
+</div>
+<div class="err" id="spErr"></div>
+<div class="row"><button class="btn" id="spCancel">Отмена</button><button class="btn pr" id="spGo">Разделить</button></div>
+</dialog>
+<div id="toasts"></div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s), esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const KIND={jpg:'img',jpeg:'img',png:'img',webp:'img',gif:'img',bmp:'img',svg:'img',pdf:'pdf',txt:'txt',html:'html',htm:'html',csv:'csv',xlsx:'xlsx',docx:'docx',pptx:'pptx'};
+const TG={img:['png','jpg','webp','bmp','pdf'],pdf:['png','jpg'],txt:['pdf'],html:['txt','pdf'],csv:['xlsx','pdf'],xlsx:['csv','pdf'],docx:['txt','html','pdf'],pptx:[]};
+const MIME={png:'image/png',jpg:'image/jpeg',webp:'image/webp',bmp:'image/bmp'};
+const MERGE_T=new Set(['pdf','txt','html','xlsx']); /* форматы, которые можно собрать в один файл */
+const UNSUP='Этот формат пока не поддерживается для локальной конвертации.';
+const BAD='Не удалось обработать файл. Возможно, файл поврежден или данный формат не поддерживается браузером.';
+const MAXSZ=150*1024*1024;
+let files=[],uid=0,busy=false,combined=[],mergeOn=true;
+if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+/* ---------- utils ---------- */
+const fmt=b=>b<1024?b+' Б':b<1048576?(b/1024).toFixed(1)+' КБ':(b/1048576).toFixed(2)+' МБ';
+const tick=()=>new Promise(r=>setTimeout(r,0));
+function toast(m,t=''){const d=document.createElement('div');d.className='toast '+t;d.textContent=m;$('#toasts').append(d);setTimeout(()=>d.remove(),4500)}
+const U=m=>Object.assign(new Error(m),{u:1});
+const lib=(x,n)=>{if(!x)throw U('Не удалось загрузить библиотеку '+n+'. Проверьте подключение к интернету.')};
+function opts(){return{q:+$('#q').value/100,w:+$('#w').value||0,h:+$('#h').value||0,keep:$('#keep').value==='1',rot:+$('#rot').value,
+ bg:$('#bgm').value==='c'?$('#bgc').value:null,ps:$('#ps').value,or:$('#or').value,mg:+$('#mg').value||0}}
+function save(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+/* скачивание нескольких файлов — каждый отдельно, в своём формате (без ZIP) */
+async function saveMany(items){
+ if(!items.length)return;
+ if(items.length>1)toast(`Скачиваю файлов: ${items.length}. Если браузер спросит, разрешите множественные загрузки.`);
+ for(const i of items){save(i.blob,i.name);await new Promise(r=>setTimeout(r,400))}}
+const toBlob=(c,t,q)=>new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('blob')),t,q));
+
+/* ---------- theme ---------- */
+const mq=matchMedia('(prefers-color-scheme: dark)');
+function setTheme(t){document.documentElement.dataset.theme=t}
+let saved=null;try{saved=localStorage.getItem('fc-theme')}catch(e){}
+setTheme(saved||(mq.matches?'dark':'light'));
+mq.addEventListener('change',e=>{if(!saved)setTheme(e.matches?'dark':'light')});
+$('#theme').onclick=()=>{const t=document.documentElement.dataset.theme==='dark'?'light':'dark';saved=t;setTheme(t);try{localStorage.setItem('fc-theme',t)}catch(e){}};
+
+/* ---------- image helpers ---------- */
+function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),i=new Image();
+ i.onload=()=>{URL.revokeObjectURL(u);res(i)};i.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('img'))};i.src=u})}
+async function toCanvas(file,o,t){
+ const img=await loadImg(file),iw=img.naturalWidth||1024,ih=img.naturalHeight||1024;
+ let w=o.w,h=o.h;
+ if(!w&&!h){w=iw;h=ih}
+ else if(o.keep){const s=w&&h?Math.min(w/iw,h/ih):w?w/iw:h/ih;w=Math.round(iw*s);h=Math.round(ih*s)}
+ else{w=w||iw;h=h||ih}
+ w=Math.max(1,w);h=Math.max(1,h);
+ if(w*h>80e6)throw U('Слишком большое разрешение. Уменьшите ширину/высоту в настройках.');
+ const sw=o.rot===90||o.rot===270,c=document.createElement('canvas');c.width=sw?h:w;c.height=sw?w:h;
+ const x=c.getContext('2d');
+ const bg=o.bg||(['jpg','bmp','pdf'].includes(t)?'#ffffff':null);
+ if(bg){x.fillStyle=bg;x.fillRect(0,0,c.width,c.height)}
+ x.translate(c.width/2,c.height/2);x.rotate(o.rot*Math.PI/180);x.drawImage(img,-w/2,-h/2,w,h);
+ return c}
+function bmp(c){
+ const w=c.width,h=c.height,d=c.getContext('2d').getImageData(0,0,w,h).data,rs=(w*3+3)&~3,sz=rs*h,buf=new ArrayBuffer(54+sz),v=new DataView(buf),u=new Uint8Array(buf);
+ v.setUint16(0,0x424D);v.setUint32(2,54+sz,true);v.setUint32(10,54,true);v.setUint32(14,40,true);v.setInt32(18,w,true);v.setInt32(22,h,true);v.setUint16(26,1,true);v.setUint16(28,24,true);v.setUint32(34,sz,true);
+ for(let y=0;y<h;y++){let p=54+(h-1-y)*rs;for(let x=0;x<w;x++){const i=(y*w+x)*4;u[p++]=d[i+2];u[p++]=d[i+1];u[p++]=d[i]}}
+ return new Blob([buf],{type:'image/bmp'})}
+
+/* ---------- PDF helpers ---------- */
+function newPdf(o){lib(window.jspdf,'jsPDF');return new window.jspdf.jsPDF({orientation:o.or,unit:'mm',format:o.ps})}
+async function imgsPdf(list,o,prog){
+ const doc=newPdf(o);
+ for(let i=0;i<list.length;i++){
+  const c=await toCanvas(list[i].file,o,'pdf');
+  if(i)doc.addPage(o.ps,o.or);
+  const pw=doc.internal.pageSize.getWidth(),ph=doc.internal.pageSize.getHeight(),aw=pw-2*o.mg,ah=ph-2*o.mg;
+  if(aw<=0||ah<=0)throw new Error('mg');
+  const s=Math.min(aw/c.width,ah/c.height),w=c.width*s,h=c.height*s;
+  doc.addImage(c.toDataURL('image/jpeg',o.q),'JPEG',(pw-w)/2,(ph-h)/2,w,h);
+  c.width=c.height=0;prog&&prog((i+1)/list.length);await tick()}
+ return doc.output('blob')}
+async function textPdf(text,o){
+ const doc=newPdf(o),dims=o.ps==='a4'?[1240,1754]:[1275,1650],L=o.or==='l',W=L?dims[1]:dims[0],H=L?dims[0]:dims[1];
+ const m=Math.round(o.mg*150/25.4)+20,fs=26,lh=38,mx=Math.floor((H-2*m)/lh);
+ const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+ x.font=fs+'px Inter,Arial,sans-serif';
+ const lines=[];
+ for(const para of text.replace(/\t/g,'    ').split(/\r?\n/)){
+  if(!para.trim()){lines.push('');continue}
+  let cur='';
+  for(const word of para.split(/(\s+)/)){
+   const t=cur+word;
+   if(x.measureText(t).width>W-2*m&&cur){lines.push(cur);cur=word.trimStart()}else cur=t}
+  lines.push(cur)}
+ const pages=Math.max(1,Math.ceil(lines.length/mx));
+ for(let p=0;p<pages;p++){
+  x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#111';x.font=fs+'px Inter,Arial,sans-serif';x.textBaseline='top';
+  lines.slice(p*mx,(p+1)*mx).forEach((l,i)=>x.fillText(l,m,m+i*lh));
+  if(p)doc.addPage(o.ps,o.or);
+  doc.addImage(cv.toDataURL('image/jpeg',.92),'JPEG',0,0,doc.internal.pageSize.getWidth(),doc.internal.pageSize.getHeight());
+  await tick()}
+ return doc.output('blob')}
+const htmlText=s=>{const d=new DOMParser().parseFromString(s,'text/html');d.querySelectorAll('script,style,noscript').forEach(e=>e.remove());
+ d.querySelectorAll('br,p,div,li,tr,h1,h2,h3,h4,h5,h6').forEach(e=>e.append('\n'));return (d.body.textContent||'').replace(/\n{3,}/g,'\n\n').trim()};
+/* текст из txt/html/docx/csv/xlsx */
+async function extractText(f){
+ if(f.kind==='txt')return f.file.text();
+ if(f.kind==='html')return htmlText(await f.file.text());
+ if(f.kind==='docx'){lib(window.mammoth,'mammoth');return (await mammoth.extractRawText({arrayBuffer:await f.file.arrayBuffer()})).value}
+ if(f.kind==='csv'||f.kind==='xlsx'){lib(window.XLSX,'SheetJS');
+  const wb=f.kind==='csv'?XLSX.read(await f.file.text(),{type:'string'}):XLSX.read(await f.file.arrayBuffer());
+  return wb.SheetNames.map(n=>'Лист: '+n+'\n'+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n\n')}
+ throw U(UNSUP)}
+
+/* ---------- conversion core ---------- */
+async function run(f){
+ const o=opts(),base=f.name.replace(/\.[^.]+$/,''),t=f.target,out=(b,e)=>[{blob:b,name:base+'.'+(e||t)}];
+ if(f.kind==='pptx')throw U(UNSUP);
+ if(t==='pdf'&&['docx','csv','xlsx'].includes(f.kind))return out(await textPdf(await extractText(f),o));
+ if(f.kind==='img'){
+  if(t==='pdf')return out(await imgsPdf([f],o));
+  const c=await toCanvas(f.file,o,t);
+  return out(t==='bmp'?bmp(c):await toBlob(c,MIME[t],o.q))}
+ if(f.kind==='pdf'){
+  lib(window.pdfjsLib,'pdf.js');
+  const pdf=await pdfjsLib.getDocument({data:await f.file.arrayBuffer()}).promise,items=[];
+  for(let p=1;p<=pdf.numPages;p++){
+   const pg=await pdf.getPage(p),b=pg.getViewport({scale:1});let scale=o.w&&o.h?(o.keep?Math.min(o.w/b.width,o.h/b.height):o.w/b.width):o.w?o.w/b.width:o.h?o.h/b.height:2;scale=Math.max(.1,Math.min(scale,8));const vp=pg.getViewport({scale});
+   if(vp.width*vp.height>80e6)throw U('Слишком большое разрешение. Уменьшите ширину/высоту в настройках.');
+   const c=document.createElement('canvas');c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);
+   const x=c.getContext('2d'),bg=o.bg||(t==='jpg'?'#fff':null);if(bg){x.fillStyle=bg;x.fillRect(0,0,c.width,c.height)}
+   await pg.render({canvasContext:x,viewport:vp}).promise;
+   items.push({blob:await toBlob(c,MIME[t],o.q),name:`${base}-${p}.${t}`});
+   c.width=c.height=0;f.p=Math.round(p/pdf.numPages*100);render();await tick()}
+  return items}
+ if(f.kind==='txt'||f.kind==='html'){
+  const raw=await f.file.text(),txt=f.kind==='html'?htmlText(raw):raw;
+  return t==='pdf'?out(await textPdf(txt,o)):out(new Blob([txt],{type:'text/plain;charset=utf-8'}))}
+ if(f.kind==='csv'){lib(window.XLSX,'SheetJS');
+  const wb=XLSX.read(await f.file.text(),{type:'string'});
+  return out(new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}))}
+ if(f.kind==='xlsx'){lib(window.XLSX,'SheetJS');
+  const wb=XLSX.read(await f.file.arrayBuffer()),n=wb.SheetNames.length;
+  return wb.SheetNames.map(s=>({blob:new Blob(['\ufeff'+XLSX.utils.sheet_to_csv(wb.Sheets[s])],{type:'text/csv;charset=utf-8'}),name:base+(n>1?'-'+s:'')+'.csv'}))}
+ if(f.kind==='docx'){lib(window.mammoth,'mammoth');
+  const ab=await f.file.arrayBuffer();
+  if(t==='txt')return out(new Blob([(await mammoth.extractRawText({arrayBuffer:ab})).value],{type:'text/plain;charset=utf-8'}));
+  const h=(await mammoth.convertToHtml({arrayBuffer:ab})).value;
+  return out(new Blob([`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(base)}</title></head><body>${h}</body></html>`],{type:'text/html;charset=utf-8'}))}
+ throw U(UNSUP)}
+
+async function convert(f){
+ if(f.status==='work')return;
+ freeRes(f);f.inCombined=false;f.status='work';f.p=0;f.msg='';render();await tick();
+ try{f.items=await run(f);f.status='done'}
+ catch(e){console.error(e);f.status='error';f.msg=e.u?e.message:BAD;toast(f.name+': '+f.msg,'e')}
+ render()}
+function freeRes(f){f.items=null}
+
+/* ---------- сборка нескольких файлов в один ---------- */
+function resetCombined(){
+ if(!combined.length)return;
+ combined=[];files.forEach(f=>{if(f.inCombined){f.inCombined=false;f.status='ready';f.items=null}})}
+/* все файлы -> один PDF (pdf-lib) */
+async function buildCombinedPdf(list,o,prog){
+ const {PDFDocument}=PL(),out=await PDFDocument.create();
+ for(let i=0;i<list.length;i++){
+  const f=list[i];let blob;
+  if(f.kind==='pdf')blob=new Blob([await f.file.arrayBuffer()],{type:'application/pdf'});
+  else if(f.kind==='img')blob=await imgsPdf([f],o);
+  else blob=await textPdf(await extractText(f),o);
+  const src=await PDFDocument.load(await blob.arrayBuffer(),{ignoreEncryption:true,updateMetadata:false});
+  (await out.copyPages(src,src.getPageIndices())).forEach(p=>out.addPage(p));
+  prog&&prog(i+1,list.length,f);await tick()}
+ return {bytes:await out.save(),pages:out.getPageCount()}}
+async function mergeGroup(list,t){
+ const o=opts();
+ if(t==='pdf'){
+  const r=await buildCombinedPdf(list,o,(i,n)=>{$('#pg').style.width=Math.round(i/n*100)+'%'});
+  return {blob:pdfBlob(r.bytes),name:'combined.pdf'}}
+ if(t==='txt'){
+  const parts=[];for(const f of list)parts.push('=== '+f.name+' ===\n\n'+await extractText(f));
+  return {blob:new Blob([parts.join('\n\n\n')],{type:'text/plain;charset=utf-8'}),name:'combined.txt'}}
+ if(t==='html'){
+  lib(window.mammoth,'mammoth');let body='';
+  for(const f of list){const h=(await mammoth.convertToHtml({arrayBuffer:await f.file.arrayBuffer()})).value;body+=`<section><h2>${esc(f.name)}</h2>${h}</section><hr>`}
+  return {blob:new Blob([`<!DOCTYPE html><html><head><meta charset="utf-8"><title>combined</title></head><body>${body}</body></html>`],{type:'text/html;charset=utf-8'}),name:'combined.html'}}
+ if(t==='xlsx'){
+  lib(window.XLSX,'SheetJS');const wb=XLSX.utils.book_new(),used=new Set();
+  for(const f of list){
+   const src=XLSX.read(await f.file.text(),{type:'string'});
+   let n=f.name.replace(/\.[^.]+$/,'').replace(/[\\\/?*\[\]:]/g,'_').slice(0,28)||'Sheet',k=n,c=1;
+   while(used.has(k))k=n.slice(0,26)+'_'+(++c);
+   used.add(k);XLSX.utils.book_append_sheet(wb,src.Sheets[src.SheetNames[0]],k)}
+  return {blob:new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),name:'combined.xlsx'}}
+ throw U(UNSUP)}
+
+/* ---------- list / UI ---------- */
+async function pdfThumb(f){
+ try{lib(window.pdfjsLib,'pdf.js');
+  const pdf=await pdfjsLib.getDocument({data:await f.file.arrayBuffer()}).promise,pg=await pdf.getPage(1),b=pg.getViewport({scale:1}),vp=pg.getViewport({scale:260/b.width});
+  const c=document.createElement('canvas');c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
+  await pg.render({canvasContext:x,viewport:vp}).promise;
+  const bl=await toBlob(c,'image/jpeg',.8);
+  if(files.includes(f)){f.url=URL.createObjectURL(bl);render()}
+ }catch(e){console.warn('thumb',e)}}
+function addFiles(list){
+ const md=MODES[cur],added=[];
+ resetCombined();
+ if(md.one){files.forEach(x=>{freeRes(x);x.url&&URL.revokeObjectURL(x.url)});files=[];list=list.slice(0,1)}
+ for(const file of list){
+  const m=file.name.match(/\.([^.]+)$/),ext=m?m[1].toLowerCase():'',kind=KIND[ext];
+  if(!kind){toast(`«${file.name}»: формат не поддерживается`,'e');continue}
+  if(md.ext&&!md.ext.includes(ext)){toast(`«${file.name}»: для «${md.t}» нужен формат ${md.ext.map(x=>x.toUpperCase()).join('/')}`,'e');continue}
+  if(file.size>MAXSZ){toast(`«${file.name}»: файл слишком большой (макс. 150 МБ)`,'e');continue}
+  const e=ext==='jpeg'?'jpg':ext==='htm'?'html':ext,tg=TG[kind].filter(x=>x!==e);
+  const f={id:++uid,file,name:file.name,ext:e,kind,size:file.size,mime:file.type||'—',targets:tg,target:tg[0]||'',status:'ready',pages:0,url:kind==='img'?URL.createObjectURL(file):null};
+  if(kind==='pdf'){countPages(f);pdfThumb(f)}
+  if(md.target&&tg.includes(md.target))f.target=md.target;
+  if(!tg.length){f.status='error';f.msg=UNSUP}
+  files.push(f);added.push(f)}
+ render();
+ if(cur==='split'&&added[0]&&added[0].kind==='pdf')openSplit(added[0]);
+ else if(added.length&&cur!=='merge')openConvertDialog()}
+function removeF(id){const f=files.find(x=>x.id===id);if(!f)return;resetCombined();freeRes(f);f.url&&URL.revokeObjectURL(f.url);files=files.filter(x=>x!==f);render()}
+const ICON={pdf:'📕',docx:'📘',xlsx:'📗',csv:'📗',txt:'📝',html:'🌐',pptx:'📙'};
+function cardHTML(f,i,inDlg){
+ const thumb=`<div class="gt">${f.url?`<img src="${f.url}" alt="">`:(ICON[f.kind]||'📄')}<span class="gtag">${f.ext}</span><span class="gi">${i+1}</span></div>`;
+ let st='Готов к конвертации',cl='';
+ if(f.status==='work'){st='Обработка…'+(f.p?` ${f.p}%`:'');cl='s-work'}
+ else if(f.status==='error'){st=f.msg||'Ошибка';cl='s-error'}
+ else if(f.status==='done'){
+  cl='s-done';
+  if(f.inCombined)st=`✓ В общем файле ${f.target.toUpperCase()}`;
+  else{const sz=f.items.reduce((a,x)=>a+x.blob.size,0);st=`✓ ${f.target.toUpperCase()} · ${fmt(sz)}${f.items.length>1?` · ${f.items.length} файлов`:''}`}}
+ const sel=f.targets.length?`<select class="tsel" data-id="${f.id}" aria-label="Формат для ${esc(f.name)}" ${f.status==='work'?'disabled':''}>${f.targets.map(t=>`<option value="${t}" ${t===f.target?'selected':''}>${t.toUpperCase()}</option>`).join('')}</select>`:'';
+ const b=(a,txt,extra='')=>`<button class="btn sm ${extra}" data-a="${a}" data-id="${f.id}" ${f.status==='work'&&a!=='rm'?'disabled':''}>${txt}</button>`;
+ const acts=`<span class="ord">${b('up','◀')}${b('down','▶')}</span>`+(inDlg?b('rm','✕'):
+  (f.kind==='pdf'?b('split','✂'):'')+(f.targets.length?b('conv',f.status==='done'||f.status==='error'?'↻':'Конвертировать','pr'):'')+(f.status==='done'?b('dl','⬇'):'')+b('rm','✕'));
+ return `<div class="gc">${thumb}<div class="gn" title="${esc(f.name)}">${esc(f.name)}</div>
+  <div class="gm">${fmt(f.size)}${f.pages?` · ${f.pages} стр.`:''}</div>${sel}<div class="gs ${cl}">${esc(st)}</div><div class="ga">${acts}</div></div>`}
+function render(){
+ $('#listCard').classList.toggle('hide',!files.length);
+ const tot=files.reduce((a,f)=>a+f.size,0),done=files.filter(f=>f.status==='done');
+ $('#stats').textContent=`Файлов: ${files.length} · Общий размер: ${fmt(tot)}`;
+ $('#pg').style.width=files.length?Math.round(files.filter(f=>f.status==='done'||f.status==='error').length/files.length*100)+'%':'0';
+ $('#dlAll').disabled=!done.length;$('#all').disabled=busy;
+ $('#gal').innerHTML=files.map((f,i)=>cardHTML(f,i,false)).join('');
+ renderConvertDialog()}
+function renderConvertDialog(){
+ const host=$('#convertFiles');if(!host)return;
+ host.innerHTML=files.map((f,i)=>cardHTML(f,i,true)).join('');
+ const common=files.length>1?files.map(f=>f.targets).reduce((a,b)=>a.filter(x=>b.includes(x))):[];
+ $('#bulkWrap').innerHTML=common.length?`<select id="bulk" class="btn sm"><option value="">Формат для всех…</option>${common.map(t=>`<option value="${t}">${t.toUpperCase()}</option>`).join('')}</select>`:'';
+ $('#mergeChk').checked=$('#mergeChk2').checked=mergeOn;
+ const total=files.length,ready=files.filter(f=>f.targets.length&&f.status!=='done'&&f.status!=='work').length;
+ const done=files.filter(f=>f.status==='done').length;
+ const mergeKinds=['pdf','img','txt','html','docx','csv','xlsx'];
+ const canAssemble=total>=2&&files.every(f=>mergeKinds.includes(f.kind));
+ $('#convertAssemble').disabled=!canAssemble||busy;
+ $('#convertAssemble').title=canAssemble?'Собрать файлы в один PDF':'Нужны минимум два файла поддерживаемых форматов: PDF, изображения, TXT, HTML, DOCX, CSV или XLSX';
+ $('#convertCount').textContent=`Файлов: ${total} · Готово: ${done}`;
+ $('#convertStart').disabled=!ready||busy;
+ $('#convertStart').textContent=busy?'Обработка…':ready?'Конвертировать все':'Всё обработано';
+ $('#convertDownload').disabled=!done}
+function openConvertDialog(){
+ const d=$('#convertDlg');if(!d)return;
+ renderConvertDialog();
+ if(!d.open&&d.showModal)d.showModal()}
+
+async function downloadAll(){
+ const items=[...combined];
+ files.filter(f=>f.status==='done'&&!f.inCombined&&f.items).forEach(f=>f.items.forEach(i=>items.push(i)));
+ await saveMany(items)}
+
+async function onAct(e){
+ const b=e.target.closest('button[data-a]');if(!b)return;const f=files.find(x=>x.id==b.dataset.id);if(!f)return;
+ try{
+  const a=b.dataset.a;
+  if(a==='conv'){resetCombined();await convert(f)}
+  else if(a==='rm')removeF(f.id);
+  else if(a==='up'||a==='down'){const i=files.indexOf(f),j=a==='up'?i-1:i+1;if(j>=0&&j<files.length){resetCombined();[files[i],files[j]]=[files[j],files[i]];render()}}
+  else if(a==='split')openSplit(f);
+  else if(a==='dl')await saveMany(f.inCombined?combined:f.items)
+ }catch(err){toast(err.u?err.message:BAD,'e')}}
+$('#gal').addEventListener('click',onAct);
+$('#convertFiles').addEventListener('click',onAct);
+document.addEventListener('change',e=>{
+ const t=e.target;
+ if(t.classList&&t.classList.contains('tsel')){
+  const f=files.find(x=>x.id==t.dataset.id);if(!f)return;
+  resetCombined();f.target=t.value;if(f.status!=='work'){freeRes(f);f.status='ready'}render()}
+ else if(t.id==='bulk'&&t.value){
+  resetCombined();
+  files.forEach(f=>{if(f.targets.includes(t.value)&&f.status!=='work'){f.target=t.value;freeRes(f);f.status='ready'}});render()}
+ else if(t.id==='mergeChk'||t.id==='mergeChk2'){mergeOn=t.checked;resetCombined();render()}});
+$('#convertClose').onclick=()=>$('#convertDlg').close();
+$('#convertAdd').onclick=()=>{$('#convertDlg').close();$('#inp').click()};
+$('#convertStart').onclick=()=>convertAll();
+$('#convertDownload').onclick=()=>downloadAll().catch(()=>toast(BAD,'e'));
+$('#convertAssemble').onclick=()=>assembleFilesToPdf();
+
+async function convertAll(){
+ const todo=files.filter(f=>f.targets.length&&f.status!=='done');
+ if(!todo.length)return toast('Нет файлов для конвертации');
+ busy=true;resetCombined();render();
+ const groups={},handled=new Set();
+ if(mergeOn)todo.forEach(f=>{if(MERGE_T.has(f.target))(groups[f.target]=groups[f.target]||[]).push(f)});
+ for(const [t,list] of Object.entries(groups)){
+  if(list.length<2)continue;
+  list.forEach(f=>{f.status='work';f.p=0;handled.add(f)});render();await tick();
+  try{
+   const item=await mergeGroup(list,t);
+   combined.push(item);
+   list.forEach(f=>{f.status='done';f.items=[];f.inCombined=true});
+   save(item.blob,item.name);
+  }catch(e){
+   console.error(e);const msg=e.u?e.message:BAD;
+   list.forEach(f=>{f.status='error';f.msg=msg});toast('Не удалось собрать общий файл: '+msg,'e')}
+  render()}
+ for(const f of todo)if(!handled.has(f))await convert(f);
+ busy=false;render();
+ const ok=files.filter(f=>f.status==='done').length;toast(`Готово: ${ok} из ${files.length}`,'o')}
+$('#all').onclick=()=>convertAll();
+$('#dlAll').onclick=()=>downloadAll().catch(()=>toast(BAD,'e'));
+$('#assemblePdf').onclick=()=>assembleFilesToPdf();
+$('#merge').onclick=async()=>{
+ const imgs=files.filter(f=>f.kind==='img');
+ if(!imgs.length)return toast('Добавьте хотя бы одно изображение','e');
+ try{toast('Создаю PDF…');save(await imgsPdf(imgs,opts(),p=>$('#pg').style.width=Math.round(p*100)+'%'),'images.pdf');render();toast('PDF готов','o')}
+ catch(e){toast(e.u?e.message:BAD,'e')}};
+$('#clear').onclick=()=>{files.forEach(f=>{freeRes(f);f.url&&URL.revokeObjectURL(f.url)});files=[];combined=[];render()};
+$('#sort').onchange=e=>{const k=e.target.value;if(!k)return;resetCombined();
+ files.sort((a,b)=>k==='size'?b.size-a.size:String(a[k]).localeCompare(String(b[k]),'ru'));e.target.value='';render()};
+$('#q').oninput=e=>$('#qv').textContent=e.target.value;
+
+/* ---------- Сборка разных типов файлов в один PDF ---------- */
+async function assembleFilesToPdf(){
+ const supported=new Set(['pdf','img','txt','html','docx','csv','xlsx']);
+ if(files.length<2)return toast('Добавьте минимум два файла для сборки','e');
+ const unsupported=files.filter(f=>!supported.has(f.kind));
+ if(unsupported.length)return toast('Пока нельзя добавить: '+unsupported.map(f=>f.name).join(', ')+'. Поддерживаются PDF, изображения, TXT, HTML, DOCX, CSV и XLSX.','e');
+ const btn=$('#assemblePdf'),modalBtn=$('#convertAssemble');
+ btn.disabled=true;if(modalBtn)modalBtn.disabled=true;
+ try{
+  const r=await buildCombinedPdf(files,opts(),(i,n,f)=>{toast('Добавляю в PDF: '+i+' из '+n+' — '+f.name);$('#pg').style.width=Math.round(i/n*100)+'%'});
+  save(pdfBlob(r.bytes),'combined-document.pdf');
+  toast('Готово! Все файлы собраны в один PDF ('+r.pages+' стр.)','o');
+ }catch(e){
+  console.error(e);toast(e.u?e.message:'Не удалось собрать PDF. Проверьте, не повреждены ли исходные файлы.','e');
+ }finally{btn.disabled=false;render()}}
+
+/* ---------- PDF: объединение и разделение (pdf-lib) ---------- */
+const PL=()=>{lib(window.PDFLib,'pdf-lib');return window.PDFLib};
+async function loadPdfLib(file){
+ const {PDFDocument}=PL();
+ return PDFDocument.load(await file.arrayBuffer(),{ignoreEncryption:true,updateMetadata:false})}
+async function countPages(f){
+ try{f.pages=(await loadPdfLib(f.file)).getPageCount();render()}catch(e){console.warn('pages',e)}}
+function pdfBlob(bytes){return new Blob([bytes],{type:'application/pdf'})}
+
+/* Объединение: все PDF из списка, в том порядке, в котором они стоят */
+$('#mergePdf').onclick=async()=>{
+ const pdfs=files.filter(f=>f.kind==='pdf');
+ if(pdfs.length<2)return toast('Для объединения добавьте минимум два PDF','e');
+ const btn=$('#mergePdf');btn.disabled=true;
+ try{
+  const {PDFDocument}=PL(),out=await PDFDocument.create();
+  for(let i=0;i<pdfs.length;i++){
+   toast(`Объединяю: ${i+1} из ${pdfs.length}…`);
+   const src=await loadPdfLib(pdfs[i].file);
+   const pgs=await out.copyPages(src,src.getPageIndices());
+   pgs.forEach(p=>out.addPage(p));
+   $('#pg').style.width=Math.round((i+1)/pdfs.length*100)+'%';await tick()}
+  save(pdfBlob(await out.save()),'merged.pdf');
+  toast(`PDF объединён: ${out.getPageCount()} стр.`,'o')
+ }catch(e){console.error(e);toast(e.u?e.message:'Не удалось объединить. Один из PDF повреждён или защищён паролем.','e')}
+ finally{btn.disabled=false;render()}};
+
+/* Разделение */
+let splitF=null;
+const dlg=$('#splitDlg');
+function openSplit(f){
+ splitF=f;$('#spName').textContent=f.name+(f.pages?` · ${f.pages} стр.`:'');
+ $('#spMode').value='each';$('#spRanges').value='';$('#spErr').textContent='';syncSplit();
+ if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','')}
+function syncSplit(){
+ const m=$('#spMode').value;
+ $('#spRangeBox').classList.toggle('hide',m==='each');
+ $('#spHint').textContent=m==='ranges'?'Каждый диапазон станет отдельным файлом: «1-3, 5, 7-9» → 3 файла.':'Выбранные страницы будут собраны в один файл в указанном порядке.'}
+$('#spMode').onchange=syncSplit;
+$('#spCancel').onclick=()=>dlg.close();
+function parseRanges(str,n){
+ const parts=str.split(/[,;]+/).map(x=>x.trim()).filter(Boolean);
+ if(!parts.length)throw U('Укажите страницы, например: 1-3, 5');
+ return parts.map(p=>{
+  const m=p.match(/^(\d+)\s*(?:[-–—]\s*(\d+))?$/);
+  if(!m)throw U(`Не понятно: «${p}». Пример: 1-3, 5, 7-9`);
+  const a=+m[1],b=m[2]?+m[2]:a;
+  if(a<1||b<1||a>n||b>n)throw U(`Страница вне диапазона (в файле ${n} стр.): «${p}»`);
+  if(a>b)throw U(`Начало больше конца: «${p}»`);
+  const r=[];for(let i=a;i<=b;i++)r.push(i-1);return {label:a===b?String(a):`${a}-${b}`,idx:r}})}
+$('#spGo').onclick=async()=>{
+ const f=splitF;if(!f)return;
+ const go=$('#spGo');go.disabled=true;$('#spErr').textContent='';
+ try{
+  const {PDFDocument}=PL(),src=await loadPdfLib(f.file),n=src.getPageCount(),base=f.name.replace(/\.[^.]+$/,''),mode=$('#spMode').value,items=[];
+  const make=async idx=>{const d=await PDFDocument.create();(await d.copyPages(src,idx)).forEach(p=>d.addPage(p));return pdfBlob(await d.save())};
+  if(mode==='each'){
+   for(let i=0;i<n;i++){items.push({blob:await make([i]),name:`${base}-${i+1}.pdf`});
+    $('#spGo').textContent=`${i+1} / ${n}`;if(i%5===4)await tick()}}
+  else{
+   const rs=parseRanges($('#spRanges').value,n);
+   if(mode==='ranges'){for(const r of rs)items.push({blob:await make(r.idx),name:`${base}-${r.label}.pdf`})}
+   else{const idx=rs.flatMap(r=>r.idx);items.push({blob:await make(idx),name:`${base}-extract.pdf`})}}
+  dlg.close();
+  await saveMany(items);
+  toast(items.length===1?'Готово: файл сохранён':`Готово: сохранено файлов — ${items.length}`,'o')
+ }catch(e){console.error(e);$('#spErr').textContent=e.u?e.message:'Не удалось разделить PDF. Файл повреждён или защищён паролем.'}
+ finally{go.disabled=false;go.textContent='Разделить'}};
+
+/* ---------- режимы / навигация ---------- */
+const IMG=['jpg','jpeg','png','webp','bmp','gif','svg'],FM0='JPG, PNG, WEBP, GIF, BMP, SVG, PDF, DOCX, TXT, HTML, CSV, XLSX, PPTX';
+const MODES={
+ convert:{t:'Конвертер файлов онлайн',s:'Изображения, PDF, документы и таблицы — прямо в браузере',btn:'Выбрать файл'},
+ merge:{t:'Объединить PDF',s:'Соедините несколько PDF в один файл. Порядок меняйте стрелками ◀ ▶.',ext:['pdf'],btn:'Выбрать PDF файлы'},
+ split:{t:'Разделить PDF',s:'Разбейте PDF на отдельные страницы или извлеките нужные диапазоны.',ext:['pdf'],one:1,btn:'Выбрать PDF файл'},
+ jpg2pdf:{t:'JPG в PDF',s:'Преобразуйте изображения в один PDF-документ.',ext:IMG,target:'pdf',btn:'Выбрать изображения'},
+ html2pdf:{t:'HTML в PDF',s:'Преобразуйте текстовое содержимое HTML в PDF-документ.',ext:['html','htm'],target:'pdf',btn:'Выбрать HTML файл'},
+ txt2pdf:{t:'TXT в PDF',s:'Превратите текстовый файл в PDF.',ext:['txt'],target:'pdf',btn:'Выбрать TXT файл'},
+ pdf2jpg:{t:'PDF в JPG',s:'Каждая страница PDF станет изображением JPG.',ext:['pdf'],target:'jpg',btn:'Выбрать PDF файл'},
+ pdf2png:{t:'PDF в PNG',s:'Каждая страница PDF станет изображением PNG.',ext:['pdf'],target:'png',btn:'Выбрать PDF файл'},
+ docx2txt:{t:'Word в TXT',s:'Извлеките текст из документа Word.',ext:['docx'],target:'txt',btn:'Выбрать Word файл'},
+ docx2html:{t:'Word в HTML',s:'Преобразуйте документ Word в веб-страницу.',ext:['docx'],target:'html',btn:'Выбрать Word файл'},
+ xlsx2csv:{t:'Excel в CSV',s:'Каждый лист таблицы станет отдельным CSV.',ext:['xlsx'],target:'csv',btn:'Выбрать Excel файл'},
+ csv2xlsx:{t:'CSV в Excel',s:'Преобразуйте CSV в таблицу XLSX.',ext:['csv'],target:'xlsx',btn:'Выбрать CSV файл'}};
+let cur='convert';
+const closeDD=()=>document.querySelectorAll('.dd').forEach(x=>x.classList.remove('open'));
+function setMode(m){
+ if(!MODES[m])m='convert';cur=m;const d=MODES[m];
+ $('#ht').textContent=d.t;$('#hs').textContent=d.s;$('#pick').textContent=d.btn;
+ $('#inp').accept=d.ext?d.ext.map(e=>'.'+e).join(','):'';$('#inp').multiple=!d.one;
+ $('#fmts').textContent=d.ext?d.ext.map(e=>e.toUpperCase()).join(', '):FM0;
+ document.body.dataset.mode=m;if(!window.FC_MODE)document.title=(m==='convert'?'FileConvert — Конвертер файлов онлайн':d.t+' — FileConvert');
+ document.querySelectorAll('header [data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+ $('.dd').classList.toggle('on',!['convert','merge','split'].includes(m));
+ $('#mergePdf').classList.toggle('pr',m==='merge');
+ closeDD();
+ if(!window.FC_MODE){try{history.replaceState(null,'','#'+(m==='convert'?'':m))}catch(e){}}
+ render()}
+$('header').addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.mode)return setMode(b.dataset.mode);
+ if(b.classList.contains('ddb')){const dd=b.parentElement,o=dd.classList.contains('open');closeDD();dd.classList.toggle('open',!o)}});
+document.addEventListener('click',e=>{if(!e.target.closest('.dd'))closeDD()});
+$('#mergeBig').onclick=()=>$('#mergePdf').click();
+
+/* drag & drop */
+const dz=$('#drop');
+$('#pick').onclick=()=>$('#inp').click();
+dz.onclick=e=>{if(!e.target.closest('button'))$('#inp').click()};
+$('#inp').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};
+['dragenter','dragover'].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.add('over')}));
+['dragleave','drop'].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.remove('over')}));
+dz.addEventListener('drop',e=>addFiles([...e.dataTransfer.files]));
+['dragover','drop'].forEach(n=>window.addEventListener(n,e=>e.preventDefault()));
+window.addEventListener('error',e=>console.error(e.message));
+window.addEventListener('unhandledrejection',e=>{e.preventDefault();console.error(e.reason)});
+setMode(window.FC_MODE||location.hash.slice(1));
+</script>
+</body>
+</html>
